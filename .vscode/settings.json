@@ -1,0 +1,40 @@
+{
+  "C_Cpp_Runner.cCompilerPath": "D:/mingw_64/mingw64/bin/gcc.exe",
+  "C_Cpp_Runner.cppCompilerPath": "g++.exe",
+  "C_Cpp_Runner.debuggerPath": "gdb.exe",
+  "C_Cpp_Runner.cStandard": "",
+  "C_Cpp_Runner.cppStandard": "",
+  "C_Cpp_Runner.msvcBatchPath": "",
+  "C_Cpp_Runner.useMsvc": false,
+  "C_Cpp_Runner.warnings": [
+    "-Wall",
+    "-Wextra",
+    "-Wpedantic"
+  ],
+  "C_Cpp_Runner.enableWarnings": true,
+  "C_Cpp_Runner.warningsAsError": false,
+  "C_Cpp_Runner.compilerArgs": [],
+  "C_Cpp_Runner.linkerArgs": [],
+  "C_Cpp_Runner.includePaths": [
+    "${workspaceRoot}",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/**",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/x86_64-w64-mingw32",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include/c++/backward",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/include-fixed",
+    "D:/code/mingw64/bin/../lib/gcc/x86_64-w64-mingw32/8.1.0/../../../../x86_64-w64-mingw32/include"
+  ],
+  "C_Cpp_Runner.includeSearch": [
+    "*",
+    "**/*"
+  ],
+  "C_Cpp_Runner.excludeSearch": [
+    "**/build",
+    "**/build/**",
+    "**/.*",
+    "**/.*/**",
+    "**/.vscode",
+    "**/.vscode/**"
+  ]
+}
