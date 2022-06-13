@@ -13,6 +13,8 @@ struct medicine
     char num[10];
     char name[100];
     double price;
+    int cnt;
+    double total;
     struct medicine * next;
 } med;
 struct user
@@ -98,7 +100,7 @@ void menu_consumer()
     {
         case 1: check_good();break;
        // case 2: message();break;
-       // case 3: purchase();break;
+        case 3: purchase();break;
         case 4: show_all();break; 
         case 5: mod_pwd();break;
         case 6: dlete_user();break;
@@ -184,7 +186,7 @@ void menu_manager()
         case 2: dlete_medicine();break;
         case 3: modify();break;
         case 4:insert_medicine();break;
-       // case 5:check_income();break;
+        case 5:check_income();break;
        // case 6: notice();break;
        case 7: mod_pwd();break;
        case 8:dlete_user();break;
@@ -242,8 +244,9 @@ char mz[10];
     {
         p=p->next;
     }
-    FILE* fp;
+    FILE* fp,*fq;
     fp=fopen("medicine.txt","a+");
+    fq=fopen("income.txt","a+");
     while(scanf("%s",bh)==1&&strcmp(bh,"0")!=0)
     {   struct medicine * q=(struct medicine *)malloc(sizeof(struct medicine));
         q->next=NULL;
@@ -252,9 +255,12 @@ char mz[10];
         p->next=q;
         p=q;
         fprintf(fp,"%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
-    }
+        fprintf(fq,"%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",p->num,p->name,p->price,p->cnt,p->total);
+            
+   }
     p->next=NULL;
     fclose(fp);
+    fclose(fq);
 }
 void  check_good()
 {   int select,flag=0;
@@ -351,7 +357,7 @@ void  check_good()
 void show_all()
 {
 	struct medicine * p=head->next;
-	
+	printf("编号            名称             单价\n");
     while(p->next&&p)
     {
         
@@ -819,3 +825,265 @@ void dlete_user()
    
 }
 
+void purchase()
+{   char bh[20];
+    int cnt[60000];
+	 memset(cnt,0,sizeof(cnt)); 
+	show_all();
+    struct medicine *head_p =(struct medicine *)malloc(sizeof(struct medicine));
+    head_p->next=NULL;
+    int select=0;
+    printf("*************请输入要购买的药品名称!******************\n");
+    printf("*** 输入0结束购买！***\n");
+    printf("*** 输入1购买！***\n");
+    printf("*** 输入-1修改购买清单的某一项！***\n");
+    while(scanf("%d",&select)==1&&select!=0)
+
+    {   
+        if(select==0)
+        {
+            break;
+        }
+        printf("请输入要购买/删除的编号！\n");
+        scanf("%s",bh);
+        int flag=0;
+        struct medicine * p=head->next;
+         while(p)
+        {
+            
+            if(strcmp(p->num,bh)==0)
+             {   flag=1;
+                 printf("查询成功！\n");
+                 printf("%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
+                 break;
+             }
+             
+             p=p->next;
+        }
+        if(flag==0)
+        {
+            printf("没有此药品！请重新输入！\n");
+
+        }
+        else
+        {   if(select==1)
+            {
+              int count=0;
+              printf("请输入购买数量！\n");
+              scanf("%d",&count);
+              
+            printf("请确认是否购买？y/n\n"); 
+            char c;
+            getchar();
+            scanf("%c",&c);
+            printf("this %c\n",c);
+            if(c=='y')
+            {  if(cnt[atoi(bh)]==0)
+			   {
+				
+               struct medicine *q =(struct medicine *)malloc(sizeof(struct medicine));
+               strcpy(q->num,p->num);
+               strcpy(q->name,p->name);
+               q->price=p->price;
+               struct medicine *r=head_p;
+               while(r->next)
+               {
+               	r=r->next;
+			   }
+			   r->next=q;
+			   q->next=NULL;
+		       }
+		        cnt[atoi(bh)]+=count;
+
+            }
+            }
+            else if(select==-1)
+            {
+                 printf("请确认是否删除？y/n\n");
+                 getchar();
+                 char c;
+                 c=getchar();
+                 struct medicine *tmp;
+             if(c=='y')
+             {
+               struct medicine *q=head_p;
+      
+                  while(q->next)
+               {
+                     if(strcmp(q->next->num,bh)==0)
+                  {
+                       tmp=q->next;
+                       q->next=q->next->next;
+                       free(tmp);
+                       break;
+                  }
+                q=q->next;
+               }
+               cnt[atoi(bh)]=0;
+            }
+
+
+           }
+
+        }
+           printf("*************请输入要购买的药品名称!******************\n");
+          printf("*** 输入0结束购买！***\n");
+         printf("*** 输入1购买！***\n");
+        printf("*** 输入-1修改购买清单的某一项！***\n");
+    }
+
+      printf("购买如下::\n");
+      struct medicine * p=head_p->next;
+      double all_price=0;
+	   while(p)
+        { 
+        all_price+=p->price*cnt[atoi(p->num)];
+        printf("%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price*cnt[atoi(p->num)]);
+        p=p->next;
+        }
+        printf("请确认是否购买！y/n\n");
+        getchar();
+        char c;
+        c=getchar();
+        if(c=='y')
+        {   FILE* fp=fopen("income.txt","r");
+            struct medicine *head_i=(struct medicine*)malloc(sizeof(struct medicine));
+            head_i->next=NULL;
+            struct medicine *r;
+            r=head_i;
+            
+            while(!feof(fp))
+            {  struct medicine *tmp=(struct medicine *)malloc(sizeof(struct medicine));
+               fscanf(fp,"%s %s %lf %d %lf",tmp->num,tmp->name,&tmp->price,&tmp->cnt,&tmp->total);
+               tmp->cnt+=cnt[atoi(tmp->num)];
+               tmp->total=tmp->cnt*tmp->price;
+               r->next=tmp;
+               r=tmp;
+            }
+           
+            r->next=NULL;
+            fclose(fp);
+            fp=fopen("income.txt","w");
+            r=head_i->next;
+            while(r&&r->next)
+            {
+                 fprintf(fp,"%-8s\t %-8s\t %.2f\t %d\t %.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
+                 r=r->next;
+            }
+            fclose(fp);
+
+           
+            printf("%.2f元！感谢您的惠顾！\n",all_price);
+            r=head_i;
+            while(r->next)
+             {
+             	struct medicine *tmp;
+             	tmp=r->next;
+             	free(r);
+             	r=tmp;
+			 }
+
+        }
+
+}
+
+void check_income()
+{  int select=0;
+   double all_price=0,part_price=0;
+   printf("**********请选择统计类型！*************\n");
+   printf("***** ****1.统计总收益！*********\n");
+   printf("**********2.统计售出数量大于（）\n");
+   printf("**********3.统计价格大于（）并且出售总值（）大于（）的商品！***********************\n");
+   scanf("%d",&select);
+   FILE* fp=fopen("income.txt","r");
+            struct medicine *head_i=(struct medicine*)malloc(sizeof(struct medicine));
+            head_i->next=NULL;
+            struct medicine *r;
+            r=head_i;
+            while(!feof(fp))
+            {  struct medicine *tmp=(struct medicine *)malloc(sizeof(struct medicine));
+               fscanf(fp,"%s %s %lf %d %lf",tmp->num,tmp->name,&tmp->price,&tmp->cnt,&tmp->total);
+               all_price+=tmp->total;
+               r->next=tmp;
+               r=tmp;
+            }
+           
+            r->next=NULL;
+            fclose(fp);
+
+   if(select==1)
+   {
+      printf("总收入:\n");
+      printf("%.2f元!\n",all_price);
+      r=head_i->next; 
+      printf("编号            名称             单价           数量             总价  \n");
+      while(r&&r->next)
+       {
+        printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
+        r=r->next;
+        }
+   }
+   else if(select==2)
+   { int cnt=0;
+   	printf("请输入售出总数限制\n");
+   	scanf("%d",&cnt);
+   	r=head_i->next;
+       while(r)
+       {
+           if(r->cnt>=cnt)
+           {
+               part_price+=r->total;
+           }
+           r=r->next;
+       }
+      printf("部分总收入:\n");
+      printf("%.2f元!\n",part_price);
+      r=head_i->next;
+       printf("编号            名称             单价           数量             总价  \n");
+      while(r&&r->next)
+       {  if(r->cnt>=cnt)
+        printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
+        r=r->next;
+        }
+   	
+   	
+	} 
+   else if(select==3)
+   {   double price=0,total=0;
+       printf("请输入单价限制!\n");
+       scanf("%lf",&price);
+       printf("请输入出售总值限制！\n");
+       scanf("%lf",&total);
+       r=head_i->next;
+       while(r)
+       {
+           if(r->total>=total&&r->price>=price)
+           {
+               part_price+=r->total;
+           }
+           r=r->next;
+       }
+      printf("部分总收入:\n");
+      printf("%.2f元!\n",part_price);
+      r=head_i->next;
+       printf("编号            名称             单价           数量             总价  \n");
+      while(r&&r->next)
+       { if(r->total>=total&&r->price>=price)
+        printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
+        r=r->next;
+        } 
+
+
+   }
+   
+            r=head_i;
+            while(r->next)
+             {
+             	struct medicine *tmp;
+             	tmp=r->next;
+             	free(r);
+             	r=tmp;
+			 }
+
+
+}
