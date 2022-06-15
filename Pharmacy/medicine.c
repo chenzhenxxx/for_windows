@@ -1,14 +1,16 @@
-
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
 #include<conio.h>
-struct user *head_c;
-int id=0;
-int notice_cnt=0;
-int message_cnt=0;
-struct medicine *head;
-struct medicine
+struct user *head_c; //用户和管理者链表的链表头 
+int id=0; //判断是用户还是管理者 
+int notice_cnt=0; //有多少条notice 
+int message_cnt=0; //有多少条message 
+char tmp_zh[100];
+char now_user[100],now_manager[100];
+char sudo[20]="boss"; //超级密码 
+struct medicine *head; //药品的链表头 
+struct medicine   //药结构体 
 {
     char num[10];
     char name[100];
@@ -17,14 +19,13 @@ struct medicine
     double total;
     struct medicine * next;
 } med;
-struct user
+struct user //人结构体 
 {
     struct user*next;
     char  zh[30];
     char mm[30];
     
 };
-struct user *head_c;
 void init_medicine();
 void show_notice();
 void show_all();
@@ -49,8 +50,16 @@ void sign_up_user();
 void destory_user();
 void destory_medicine();
 void insert_medicine();
-void Welcome()
-{   fflush(stdin);
+void logout();
+void down_BubbleSort(struct medicine * L);
+void up_BubbleSort(struct medicine * L);
+void dlete_manager();
+void add_manager();
+void logout();
+void Welcome()  //欢迎菜单 
+{   
+
+   fflush(stdin);
     id=0;
     printf("*   *   *  * * *    * *    *         *        *  *      * * *\n ");
     printf("* * * *   * *    *    *   *      *     *    *  *  *    * *  \n" );
@@ -59,6 +68,11 @@ void Welcome()
     printf("请选择你的身份\n");
     printf("1.消费者         2.管理者\n");
     scanf("%d",&id);
+    if(id!=1&&id!=2)
+    {
+    	printf("输入错误！\n");
+    	Welcome();
+	}
     getchar();
     destory_medicine(); 
     destory_user;
@@ -84,10 +98,11 @@ void Welcome()
 
 
 }
-void menu_consumer()
+void menu_consumer() //用户菜单 
 {   int flag=0;
-    //show_notice();
-    printf("你好消费者，请选择你的服务！\n");
+    if(notice_cnt!=0)
+	show_notice();
+    printf("你好消费者 %s，请选择你的服务！\n",now_user);
     printf(" 1.查询本店药品\n");
     printf(" 2.给商家留言\n");
     printf(" 3.购买药品\n");
@@ -99,19 +114,23 @@ void menu_consumer()
     switch(flag)
     {
         case 1: check_good();break;
-       // case 2: message();break;
+        case 2: message();break;
         case 3: purchase();break;
         case 4: show_all();break; 
         case 5: mod_pwd();break;
-        case 6: dlete_user();break;
+        case 6: logout();break;
         case 7: Welcome();break; 
         default: printf("请输入正确的操作\n");menu_consumer();break;
         
     }
+    if(flag==6)
+    {
+    	Welcome();
+	}
     menu_consumer();
 
 }
-int password(char *zh)
+int password(char *zh)  //登录密码验证 
 {   
 	
 	char buf[18];
@@ -154,8 +173,11 @@ int password(char *zh)
 		else if(c=='\b')
 		 {
 		 	printf("\b \b");
-		 	len--;
-		 	buf[len]='\0';
+		 	if(len>0)
+		 	{    len--;
+                 buf[len]='\0';
+		 	 
+            }
 		  } 
 		  else
 		  {
@@ -165,11 +187,15 @@ int password(char *zh)
 	}
 	return 0;
 }
-void menu_manager()
+void menu_manager()  //管理者菜单 
 {
      int flag=0;
-     //show_message();
-    printf("你好生产者，请选择你的服务！\n");
+     
+    printf("你好生产者 %s，请选择你的服务！\n",now_manager);
+    if(message_cnt!=0)
+    {
+    	printf("有消费者留言，请注意查收!\n");
+	}
     printf(" 1.上新药品\n");
     printf(" 2.下架药品\n");
     printf(" 3.修改药品\n");
@@ -177,8 +203,10 @@ void menu_manager()
     printf(" 5.查看收益\n");
     printf(" 6.发布公告\n");
     printf(" 7.修改密码\n");
-    printf(" 8.管理账户\n"); 
-    printf(" 9.退出\n");
+    printf(" 8.管理用户账户\n"); 
+    printf(" 9. 查看留言！\n");
+    printf(" 10.删除管理者！\n");
+    printf(" 11.退出\n");
     scanf("%d",&flag);
     switch(flag)
     {
@@ -187,21 +215,23 @@ void menu_manager()
         case 3: modify();break;
         case 4:insert_medicine();break;
         case 5:check_income();break;
-       // case 6: notice();break;
+        case 6: notice();break;
        case 7: mod_pwd();break;
        case 8:dlete_user();break;
-       case 9: Welcome();break;
+       case 9: show_message();break; 
+       case 10: dlete_manager();break;
+       case 11: Welcome();break;
         default: printf("请输入正确的操作\n");menu_manager();break;
         
     }
     menu_manager();
 }
-int main()
+int main() 
 {   //system("color A5");
     
     Welcome();
 }
-void init_medicine()
+void init_medicine() //初始化药品的链表 
 {   FILE *fp;
 head=(struct medicine *)malloc(sizeof(struct medicine));
 head->next=NULL;
@@ -223,7 +253,7 @@ struct medicine *q;
     q->next=NULL;
     fclose(fp);
 }
-void destory_medicine()
+void destory_medicine()  //摧毁药品链表 
 {
     struct medicine *p=head;
     while(p)
@@ -234,21 +264,38 @@ void destory_medicine()
     }
 
 }
-void add()
-{   printf("当编号输入0 退出add\n");
+void add()  //添加药品   
+{   
+    printf("当编号输入0 退出add\n");
     char bh[10];
-char mz[10];
+    char mz[10];
     double jg;
     struct medicine *p=head->next;
     while(p&&p->next)
-    {
+    {   
         p=p->next;
     }
     FILE* fp,*fq;
     fp=fopen("medicine.txt","a+");
     fq=fopen("income.txt","a+");
     while(scanf("%s",bh)==1&&strcmp(bh,"0")!=0)
-    {   struct medicine * q=(struct medicine *)malloc(sizeof(struct medicine));
+     {   int flag=0; 
+	    struct medicine *r=head->next;
+        while(r)
+        {
+            if(strcmp(r->num,bh)==0)
+            {  flag=1;
+               char clear[20];
+               double cl;
+               scanf("%s %lf",clear,&cl);
+                printf("已经有此药品！\n");
+                break;
+            }
+            r=r->next;
+        }
+        if(flag==1)
+        continue;
+        struct medicine * q=(struct medicine *)malloc(sizeof(struct medicine));
         q->next=NULL;
         strcpy(q->num,bh);
         scanf("%s %lf",q->name,&q->price);
@@ -262,8 +309,9 @@ char mz[10];
     fclose(fp);
     fclose(fq);
 }
-void  check_good()
-{   int select,flag=0;
+void  check_good() //查询药品 
+{   
+    int select,flag=0;
     printf("    亲爱的消费者，请选择查找方式！\n");
     printf("*****选项1 编号查找 ******\n");
     printf("*****选项2 名称查找 ******\n");
@@ -354,7 +402,7 @@ void  check_good()
  
     
 }
-void show_all()
+void show_all()  //显示药店药品清单 
 {
 	struct medicine * p=head->next;
 	printf("编号            名称             单价\n");
@@ -365,12 +413,17 @@ void show_all()
         p=p->next;
     }
 }
-void modify()
-{  char tmp[20];
+void modify()  //修改药品 
+{  
+   char tmp[20];
    int flag=0;
    int select=0;
-   printf("请输入要修改的药品编号\n");
+   printf("请输入要修改的药品编号(输入0退出)\n");
    scanf("%s",&tmp);
+   if(strcmp(tmp,"0")==0)
+    {
+        return;
+    }
     struct medicine *p=head;
         while(p->next!=NULL)
         {
@@ -440,10 +493,11 @@ void modify()
 
 
 }
-void get_pwd(char *buf)
-{    int len=0;
-  while(1)
-	{
+void get_pwd(char *buf) //输入密码 
+{  memset(buf,0,sizeof(buf));
+   int len=0;
+   while(1)
+	 {
 		char c=_getch();
 		if(c=='\r')
 		{
@@ -452,8 +506,12 @@ void get_pwd(char *buf)
 		else if(c=='\b')
 		 {
 		 	printf("\b \b");
-		 	 if(len>0)
-		 	len--;
+             if(len>0)
+		 	{    len--;
+                 buf[len]='\0';
+		 	 
+            }
+             
 		  } 
 		  else
 		  {
@@ -462,8 +520,9 @@ void get_pwd(char *buf)
 		  }
 }
 }
-void mod_pwd()
-{  char tmppwd[20],tmpzh[20];
+void mod_pwd()  //修改密码 
+{  
+   char tmppwd[20],tmpzh[20];
    printf("请输入原账号！\n");
    scanf("%s",&tmpzh);
    printf("请输入原密码！\n");
@@ -522,8 +581,9 @@ void mod_pwd()
    }
 }
 
-void init_user()
-{  FILE*fp;
+void init_user() //初始化用户 
+{  
+    FILE*fp;
     head_c=(struct user *)malloc(sizeof(struct user));
 head_c->next=NULL;
 struct user *q;
@@ -548,7 +608,7 @@ struct user *q;
     fclose(fp);
 }
 
-void sign_up_user()
+void sign_up_user()  //用户注册 
 {
     printf("请输入用户名\n");
     char zh[20];
@@ -564,9 +624,9 @@ void sign_up_user()
            get_pwd(new2);
            fflush(stdin);
            if(strcmp(new1,new2)!=0)
-           {   printf("%s|%s",new1,new2);
+           {   
 		   printf("密码错误！\n");
-               login_user();
+               Welcome();
            }
            else
        {    struct user * p=head_c;
@@ -597,17 +657,23 @@ void sign_up_user()
      
 }
 
-void login_user()
-{   int flag=0;
+void login_user()  //用户登录 
+{   
+    int flag=0;
     printf("请输入账号:\n");
     char zh[20];
     char tm_zh[20],tm_pwd[20];
     scanf("%s",&zh);
+    strcpy(tmp_zh,zh);
     FILE*fp;
     if(id==1)
-    fp=fopen("consumer.txt","r");
+    {   strcpy(now_user,zh);
+        fp=fopen("consumer.txt","r");
+    }
     else if(id==2)
-    fp=fopen("manager.txt","r");
+    {   strcpy(now_manager,zh);
+        fp=fopen("manager.txt","r");
+    }
     while(!feof(fp))
     {
         fscanf(fp,"%s %s",tm_zh,tm_pwd);
@@ -631,6 +697,20 @@ void login_user()
       }
       
     }
+    else if(flag==0&&id==2)
+    {   printf("亲爱的管理者现在您尚未有账户，是否注册？ y/n\n");
+         getchar();
+        char c;
+        scanf("%c",&c);
+         if(c=='n')
+         {
+          Welcome();
+         }
+      else
+      { 
+        add_manager();
+      }
+	}
     else
     { printf("请输入密码\n");
       if(!password(zh))
@@ -646,15 +726,21 @@ void login_user()
 
 }
 
-void insert_medicine()
-{  int flag=0;
+void insert_medicine() //插入药品 
+{  
+   int flag=0;
    struct medicine *p=head;
    char num[20];
    char tmp_num[20],tmp_name[20];
    double tmp_price;
-   printf("请输入插入的数据! \n");
-   scanf("%s %s %lf",tmp_num,tmp_name,&tmp_price);
-   printf("请输入想插入的对象编号！\n");
+   printf("请输入插入的数据!(输入-1退出)\n");
+    scanf("%s",tmp_num);
+    if(strcmp(tmp_num,"-1")==0)
+     {
+         return;
+     }
+   scanf("%s %lf",tmp_name,&tmp_price);
+   printf("请输入想插入的对象编号！(输入 0插入到头部)\n");
    scanf("%s",num);
    while(p&&p->next)
    {
@@ -665,20 +751,32 @@ void insert_medicine()
        }
        p=p->next;
    }
-   if(flag==0)
+   if(flag==0&&strcmp(num,"0")!=0)
    {
        printf("没有此对象！\n");
+       return;
       
    }
-   else if(flag==1)
+   else 
    {
      struct medicine *q=(struct medicine *)malloc(sizeof(struct medicine));
      q->next=NULL;
      strcpy(q->num,tmp_num);
       strcpy(q->name,tmp_name);
       q->price=tmp_price;
+      
+      if(strcmp(num,"0")==0)
+       {  
+          q->next=head->next;
+          head->next=q;
+
+       }
+       else
+      {  
       q->next=p->next;
       p->next=q;
+      }
+   }
       FILE* fp;
       fp=fopen("medicine.txt","w");
       p=head->next;
@@ -689,21 +787,27 @@ void insert_medicine()
       }
       fclose(fp);
 
-   }
+   
 
 }
 
-void dlete_medicine()
-{   char num[20];
+void dlete_medicine() //删除药品 
+{   
+    char num[20];
+    char yao[20];
     int flag=0;
-    printf("请输入想删除的编号\n");
+    printf("请输入想删除的编号(输入0退出)\n");
     scanf("%s",num);
+    if(strcmp(num,"0")==0)
+     {
+         return;
+     }
     struct medicine *p=head->next;
     struct medicine *tmp=NULL; 
     while(p)
     {
         if(strcmp(p->num,num)==0)
-        {
+        {   strcpy(yao,p->name);
             flag=1;
             break;
         }
@@ -740,13 +844,15 @@ void dlete_medicine()
             p=p->next;
         }
         fclose(fp);
+        printf("删除药品%s 成功！\n",yao);
 
     }
 }
 
 
-void dlete_user()
-{  char bh[20];
+void dlete_user() //删除用户 
+{  
+   char bh[20];
    int flag=0;
    struct user * head_tmp,*q,*p,*tmp;
    head_tmp=(struct user *)malloc(sizeof(struct user));
@@ -797,7 +903,7 @@ void dlete_user()
 			 }
 			 p=p->next;
 		}
-		 printf("6666\n");
+		 //printf("6666\n");
 		FILE*fp;
         fp=fopen("consumer.txt","w+");
 
@@ -825,8 +931,9 @@ void dlete_user()
    
 }
 
-void purchase()
-{   char bh[20];
+void purchase() //购买药品 
+{   
+    char bh[20];
     int cnt[60000];
 	 memset(cnt,0,sizeof(cnt)); 
 	show_all();
@@ -876,7 +983,6 @@ void purchase()
             char c;
             getchar();
             scanf("%c",&c);
-            printf("this %c\n",c);
             if(c=='y')
             {  if(cnt[atoi(bh)]==0)
 			   {
@@ -885,6 +991,7 @@ void purchase()
                strcpy(q->num,p->num);
                strcpy(q->name,p->name);
                q->price=p->price;
+               q->total+=count*q->price;
                struct medicine *r=head_p;
                while(r->next)
                {
@@ -905,13 +1012,13 @@ void purchase()
                  c=getchar();
                  struct medicine *tmp;
              if(c=='y')
-             {
+             {  
                struct medicine *q=head_p;
       
                   while(q->next)
                {
                      if(strcmp(q->next->num,bh)==0)
-                  {
+                  {     q->total=0;
                        tmp=q->next;
                        q->next=q->next->next;
                        free(tmp);
@@ -933,7 +1040,9 @@ void purchase()
     }
 
       printf("购买如下::\n");
+      up_BubbleSort(head_p);; //升序排序
       struct medicine * p=head_p->next;
+
       double all_price=0;
 	   while(p)
         { 
@@ -987,8 +1096,9 @@ void purchase()
 
 }
 
-void check_income()
-{  int select=0;
+void check_income()  //统计收益 
+{  
+   int select=0;
    double all_price=0,part_price=0;
    printf("**********请选择统计类型！*************\n");
    printf("***** ****1.统计总收益！*********\n");
@@ -1015,9 +1125,10 @@ void check_income()
    {
       printf("总收入:\n");
       printf("%.2f元!\n",all_price);
-      r=head_i->next; 
+      up_BubbleSort(head_i);
+      r=head_i->next->next; 
       printf("编号            名称             单价           数量             总价  \n");
-      while(r&&r->next)
+      while(r)
        {
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
         r=r->next;
@@ -1027,7 +1138,8 @@ void check_income()
    { int cnt=0;
    	printf("请输入售出总数限制\n");
    	scanf("%d",&cnt);
-   	r=head_i->next;
+     up_BubbleSort(head_i);
+      r=head_i->next->next; 
        while(r)
        {
            if(r->cnt>=cnt)
@@ -1038,9 +1150,9 @@ void check_income()
        }
       printf("部分总收入:\n");
       printf("%.2f元!\n",part_price);
-      r=head_i->next;
+      r=head_i->next->next;
        printf("编号            名称             单价           数量             总价  \n");
-      while(r&&r->next)
+      while(r)
        {  if(r->cnt>=cnt)
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
         r=r->next;
@@ -1054,7 +1166,8 @@ void check_income()
        scanf("%lf",&price);
        printf("请输入出售总值限制！\n");
        scanf("%lf",&total);
-       r=head_i->next;
+        up_BubbleSort(head_i);
+      r=head_i->next->next; 
        while(r)
        {
            if(r->total>=total&&r->price>=price)
@@ -1065,9 +1178,9 @@ void check_income()
        }
       printf("部分总收入:\n");
       printf("%.2f元!\n",part_price);
-      r=head_i->next;
+      r=head_i->next->next;
        printf("编号            名称             单价           数量             总价  \n");
-      while(r&&r->next)
+      while(r)
        { if(r->total>=total&&r->price>=price)
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
         r=r->next;
@@ -1087,3 +1200,327 @@ void check_income()
 
 
 }
+
+
+void notice()
+{   char s[200];
+    FILE *fp=fopen("notice.txt","a+");
+	printf("请输入你想输入的告示！(输入0退出)\n");
+	while(scanf("%s",s)==1&&strcmp(s,"0")!=0)
+	{ notice_cnt++;
+	  fprintf(fp,"%s\n",s);	
+	} 
+	fclose(fp);
+	
+
+} 
+void message()
+{   char s[200];
+    FILE *fp=fopen("message.txt","a+");
+	printf("请输入你想输入的留言！(输入0退出)\n");
+	while(scanf("%s",s)==1&&strcmp(s,"0")!=0)
+	{ message_cnt++;
+	  fprintf(fp,"%s %s\n",tmp_zh,s);	
+	} 
+	fclose(fp);
+	
+
+} 
+void show_notice()
+{
+	FILE*fp=fopen("notice.txt","r");
+	while(!feof(fp)&&notice_cnt--)
+	{   char s[100];
+	    fscanf(fp,"%s",s);
+		printf("notice:%s\n",s);
+	}
+	fclose(fp);
+	fp=fopen("notice.txt","w");
+	fclose(fp);
+	notice_cnt=0;
+ } 
+ void show_message()
+{
+	FILE*fp=fopen("message.txt","r");
+	while(!feof(fp)&&message_cnt--)
+	{   char s[100],zh[100];
+	    fscanf(fp," %s %s",zh,s);
+		printf("message from %s :%s\n",zh,s);
+	}
+	fclose(fp);
+	fp=fopen("message.txt","w");
+	fclose(fp);
+	message_cnt=0; 
+ } 
+
+ void add_manager()
+ {
+ 	FILE* fp;
+    printf("请输入sudo密码!\n");
+    char pwd[20];
+	get_pwd(pwd);
+	if(strcmp(pwd,sudo)!=0)
+	 {
+	 	printf("密码错误！\n");
+         Welcome();
+	  } 
+	 else
+	{   char zh[20],mm[20];
+		FILE*fp;
+		fp=fopen("manager.txt","a");
+		printf("请输入想添加的管理者！\n");
+		scanf("%s",zh);
+		char new1[20],new2[20];
+           printf("请输入新密码\n");
+           get_pwd(new1);
+           printf("请确认新密码\n");
+           get_pwd(new2);
+           if(strcmp(new1,new2)!=0)
+           { printf("%s | %s\n",new1,new2);
+             printf("两次输入密码不一致!\n");
+             Welcome();
+             
+           }
+           else
+		   {
+		   	fprintf(fp,"%s %s\n",zh,new1);
+		   	printf("Welcome new manager %s!\n",zh);
+			} 
+			fclose(fp);
+		
+	}
+    
+ } 
+ 
+ 
+ void dlete_manager() //删除用户 
+{  
+   char bh[20];
+   int flag=0;
+   struct user * head_tmp,*q,*p,*tmp;
+   printf("请输入sudo 密码！\n");
+   char pwd[20];
+   get_pwd(pwd);
+   if(strcmp(pwd,sudo)!=0)
+   { 
+   	printf("sudo密码错误！\n");
+   	return;
+	} 
+   head_tmp=(struct user *)malloc(sizeof(struct user));
+   head_tmp->next=NULL;
+   q=head_tmp;
+   FILE *fp;
+   fp=fopen("manager.txt","r");
+   while(!feof(fp))
+   { struct user*p=(struct user *)malloc(sizeof(struct user));
+   	 fscanf(fp,"%s %s",p->zh,p->mm);
+   	 q->next=p;
+   	 q=p;
+   }
+   q->next=NULL;
+   
+   printf("请输入要删除的编号\n");
+   scanf("%s",bh);
+   p=head_tmp;
+   while(p->next)
+   {
+   	if(strcmp(p->next->zh,bh)==0)
+   	 {
+   	 	 flag=1;
+   	 	 break;
+	 }
+	 p=p->next;
+   }
+   
+    //printf("1111111111111\n");
+    
+   if(flag==0)
+   {
+   	printf("没有管理者！\n");
+   }
+   else if(flag==1)
+    {    
+        
+		
+		
+		
+    	p=head_tmp;
+    	while(p->next)
+    	{
+    		if(strcmp(p->next->zh,bh)==0)
+    		 {
+    		 	tmp=p->next;
+    		 	p->next=p->next->next;
+    		 	free(tmp);
+    		 	break;
+			 }
+			 p=p->next;
+		}
+		//printf("2222222222111111\n");
+		FILE*fp;
+        fp=fopen("manager.txt","w+");
+
+        p=head_tmp->next;
+        while(p)
+        {  fprintf(fp,"%-8s\t %-8s\t\n",p->zh,p->mm);
+            p=p->next;
+        }
+        fclose(fp);
+        //printf("333333333111111\n");
+	}
+	   p=head_tmp;
+       while(p->next)
+       {
+       	struct user *tmp;
+       	tmp=p->next;
+       	free(p);
+       	p=tmp;
+	   }
+	   
+       // printf("444444444\n");
+   
+   
+   
+   
+}
+void logout()
+{   printf("请三思！ y/n\n");
+    char c;
+    getchar();
+    c=getchar();
+    if(c=='n')
+    {
+        return;
+
+    }
+    else 
+    { printf("请输入密码！\n");
+    if(!password(now_user))
+    {
+        printf("密码错误！\n");
+    }
+    else
+    {   
+      int flag=0;
+      struct user * head_tmp,*q,*p,*tmp;
+      head_tmp=(struct user *)malloc(sizeof(struct user));
+      head_tmp->next=NULL;
+      q=head_tmp;
+      FILE *fp;
+      fp=fopen("consumer.txt","r");
+      while(!feof(fp))
+      { struct user*p=(struct user *)malloc(sizeof(struct user));
+   	    fscanf(fp,"%s %s",p->zh,p->mm);
+   	    q->next=p;
+   	  q=p;
+      }
+      q->next=NULL;
+      p=head_tmp;
+      while(p->next)
+     {
+   	   if(strcmp(p->next->zh,now_user)==0)
+   	   {
+   	 	  flag=1;
+   	 	  break;
+	   }
+	   p=p->next;
+     }
+    	p=head_tmp;
+    	while(p->next)
+    	{
+    		if(strcmp(p->next->zh,now_user)==0)
+    		 {
+    		 	tmp=p->next;
+    		 	p->next=p->next->next;
+    		 	free(tmp);
+    		 	break;
+			 }
+			 p=p->next;
+		}
+		 
+        fp=fopen("consumer.txt","w+");
+
+        p=head_tmp->next;
+        while(p&&p->next)
+        {  fprintf(fp,"%-8s\t %-8s\t\n",p->zh,p->mm);
+            p=p->next;
+        }
+        fclose(fp);
+	    
+	   p=head_tmp->next;
+       while(p)
+       {
+       	struct user *tmp;
+       	tmp=p->next;
+       	free(p);
+       	p=tmp;
+	   }
+	   
+	   free(head_tmp);
+        printf("亲爱的%s 用户，我们有缘再见!\n",now_user);
+    }
+}
+}
+
+void up_BubbleSort(struct medicine * L)
+{
+	int i ,count = 0, num;//count记录链表结点的个数，num进行内层循环，
+	struct medicine  *p, *q, *tail;//创建三个指针，进行冒泡排序
+	p = L;
+	while(p->next != NULL)//计算出结点的个数
+	{
+		count++;//注释①
+		p = p->next;
+	}
+	for(i = 0; i < count - 1; i++)//外层循环，跟数组冒泡排序一样
+	{
+		num = count - i - 1;//记录内层循环需要的次数，跟数组冒泡排序一样，
+		q = L->next;//令q指向第一个结点
+		p = q->next;//令p指向后一个结点
+		tail = L;//让tail始终指向q前一个结点，方便交换，也方便与进行下一步操作
+		while(num--)//内层循环 次数跟数组冒泡排序一样
+		{
+			if(q->total > p->total)//如果该结点的值大于后一个结点，则交换
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+			tail = tail->next;//注释②
+			q = tail->next;//注释②
+			p = q->next;//注释②
+		 } 
+	} 
+}
+
+void down_BubbleSort(struct medicine * L)
+{
+	int i ,count = 0, num;//count记录链表结点的个数，num进行内层循环，
+	struct medicine  *p, *q, *tail;//创建三个指针，进行冒泡排序
+	p = L;
+	while(p->next != NULL)//计算出结点的个数
+	{
+		count++;//注释①
+		p = p->next;
+	}
+	for(i = 0; i < count - 1; i++)//外层循环，跟数组冒泡排序一样
+	{
+		num = count - i - 1;//记录内层循环需要的次数，跟数组冒泡排序一样，
+		q = L->next;//令q指向第一个结点
+		p = q->next;//令p指向后一个结点
+		tail = L;//让tail始终指向q前一个结点，方便交换，也方便与进行下一步操作
+		while(num--)//内层循环 次数跟数组冒泡排序一样
+		{
+			if(q->total < p->total)//如果该结点的值大于后一个结点，则交换
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+			tail = tail->next;//注释②
+			q = tail->next;//注释②
+			p = q->next;//注释②
+		 } 
+	} 
+}
+

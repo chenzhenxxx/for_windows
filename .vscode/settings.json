@@ -36,5 +36,9 @@
     "**/.*/**",
     "**/.vscode",
     "**/.vscode/**"
-  ]
+  ],
+  "C_Cpp.errorSquiggles": "Enabled",
+  "files.associations": {
+    "TXT.C": "cpp"
+  }
 }
