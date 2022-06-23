@@ -1,16 +1,16 @@
 #include<stdio.h>
 #include<string.h>
 #include<stdlib.h>
-#include<conio.h>
-struct user *head_c; //ÓÃ»§ºÍ¹ÜÀíÕßÁ´±íµÄÁ´±íÍ· 
-int id=0; //ÅĞ¶ÏÊÇÓÃ»§»¹ÊÇ¹ÜÀíÕß 
-int notice_cnt=0; //ÓĞ¶àÉÙÌõnotice 
-int message_cnt=0; //ÓĞ¶àÉÙÌõmessage 
+#include<conio.h>  //ç”¨äº*è¾“å…¥å¯†ç 
+struct user *head_c; //ç”¨æˆ·å’Œç®¡ç†è€…é“¾è¡¨çš„é“¾è¡¨å¤´ 
+int id=0; //åˆ¤æ–­æ˜¯ç”¨æˆ·è¿˜æ˜¯ç®¡ç†è€… 
+int notice_cnt=0; //æœ‰å¤šå°‘æ¡notice 
+int message_cnt=0; //æœ‰å¤šå°‘æ¡message 
 char tmp_zh[100];
-char now_user[100],now_manager[100];
-char sudo[20]="boss"; //³¬¼¶ÃÜÂë 
-struct medicine *head; //Ò©Æ·µÄÁ´±íÍ· 
-struct medicine   //Ò©½á¹¹Ìå 
+char now_user[100],now_manager[100];  //ç°åœ¨çš„ç”¨æˆ·æˆ–ç®¡ç†è€…
+char sudo[20]="boss"; //è¶…çº§å¯†ç  
+struct medicine *head; //è¯å“çš„é“¾è¡¨å¤´ 
+struct medicine   //è¯ç»“æ„ä½“ 
 {
     char num[10];
     char name[100];
@@ -19,7 +19,7 @@ struct medicine   //Ò©½á¹¹Ìå
     double total;
     struct medicine * next;
 } med;
-struct user //ÈË½á¹¹Ìå 
+struct user //äººç»“æ„ä½“ 
 {
     struct user*next;
     char  zh[30];
@@ -51,34 +51,41 @@ void destory_user();
 void destory_medicine();
 void insert_medicine();
 void logout();
-void down_BubbleSort(struct medicine * L);
-void up_BubbleSort(struct medicine * L);
+void down_sort(struct medicine * L,int flag);
+void up_sort(struct medicine * L,int flag);
 void dlete_manager();
 void add_manager();
 void logout();
-void Welcome()  //»¶Ó­²Ëµ¥ 
+void Welcome()  //æ¬¢è¿èœå• 
 {   
 
    fflush(stdin);
-    id=0;
-    printf("*   *   *  * * *    * *    *         *        *  *      * * *\n ");
-    printf("* * * *   * *    *    *   *      *     *    *  *  *    * *  \n" );
-    printf("  *   *    * * *    * *    * * *     *      *       *   * * * \n");
-    printf("»¶Ó­À´µ½Î÷ÓÊÒ©µê£¡\n");
-    printf("ÇëÑ¡ÔñÄãµÄÉí·İ\n");
-    printf("1.Ïû·ÑÕß         2.¹ÜÀíÕß\n");
+    id=0;  
+    printf("*   *   *  * * *      *        *  *      *         *  *      * * *\n");
+    printf(" * * * *   * *        *      *        *     *    *  *  *     * *\n" );
+    printf("  *   *    * * *      * * *    *  *      *      *       *    * * * \n");
+    printf("æ¬¢è¿æ¥åˆ°è¥¿é‚®è¯åº—ï¼\n");
+    printf("è¯·é€‰æ‹©ä½ çš„èº«ä»½\n");
+    printf("1.æ¶ˆè´¹è€…         2.ç®¡ç†è€…\n");
     scanf("%d",&id);
+     char c;
+     if((c=getchar())!='\n')
+     {
+     	printf("è¾“å…¥é”™è¯¯ï¼\n");
+    	Welcome();
+	 }
+     
     if(id!=1&&id!=2)
     {
-    	printf("ÊäÈë´íÎó£¡\n");
+    	printf("è¾“å…¥é”™è¯¯ï¼\n");
     	Welcome();
 	}
-    getchar();
-    destory_medicine(); 
+   
+    destory_medicine(); //æ‘§æ¯åŸæœ‰é“¾è¡¨
     destory_user;
-    init_user();
+    init_user();  //åˆå§‹åŒ–é“¾è¡¨
     init_medicine();
-    login_user();  //µÇÂ¼½çÃæ
+    login_user();  //ç™»å½•ç•Œé¢
 
     if(id==1)
     {   
@@ -91,25 +98,25 @@ void Welcome()  //»¶Ó­²Ëµ¥
     
     else
     {    
-         printf("ÇëÊäÈëÕıÈ·µÄ²Ù×÷\n");
+         printf("è¯·è¾“å…¥æ­£ç¡®çš„æ“ä½œ\n");
         
     }
      Welcome();
 
 
 }
-void menu_consumer() //ÓÃ»§²Ëµ¥ 
+void menu_consumer() //ç”¨æˆ·èœå• 
 {   int flag=0;
     if(notice_cnt!=0)
 	show_notice();
-    printf("ÄãºÃÏû·ÑÕß %s£¬ÇëÑ¡ÔñÄãµÄ·şÎñ£¡\n",now_user);
-    printf(" 1.²éÑ¯±¾µêÒ©Æ·\n");
-    printf(" 2.¸øÉÌ¼ÒÁôÑÔ\n");
-    printf(" 3.¹ºÂòÒ©Æ·\n");
-    printf(" 4.Õ¹Ê¾±¾µêÒÑÓĞÒ©Æ·Çåµ¥\n");
-    printf(" 5.ĞŞ¸ÄÃÜÂë\n");
-    printf(" 6.×¢ÏúÕË»§\n");
-    printf(" 7.ÍË³ö\n");
+    printf("ä½ å¥½æ¶ˆè´¹è€… %sï¼Œè¯·é€‰æ‹©ä½ çš„æœåŠ¡ï¼\n",now_user);
+    printf(" 1.æŸ¥è¯¢æœ¬åº—è¯å“\n");
+    printf(" 2.ç»™å•†å®¶ç•™è¨€\n");
+    printf(" 3.è´­ä¹°è¯å“\n");
+    printf(" 4.å±•ç¤ºæœ¬åº—å·²æœ‰è¯å“æ¸…å•\n");
+    printf(" 5.ä¿®æ”¹å¯†ç \n");
+    printf(" 6.æ³¨é”€è´¦æˆ·\n");
+    printf(" 7.é€€å‡º\n");
     scanf("%d",&flag);
     switch(flag)
     {
@@ -120,7 +127,7 @@ void menu_consumer() //ÓÃ»§²Ëµ¥
         case 5: mod_pwd();break;
         case 6: logout();break;
         case 7: Welcome();break; 
-        default: printf("ÇëÊäÈëÕıÈ·µÄ²Ù×÷\n");menu_consumer();break;
+        default: printf("è¯·è¾“å…¥æ­£ç¡®çš„æ“ä½œ\n");menu_consumer();break;
         
     }
     if(flag==6)
@@ -130,7 +137,7 @@ void menu_consumer() //ÓÃ»§²Ëµ¥
     menu_consumer();
 
 }
-int password(char *zh)  //µÇÂ¼ÃÜÂëÑéÖ¤ 
+int password(char *zh)  //ç™»å½•å¯†ç éªŒè¯ 
 {   
 	
 	char buf[18];
@@ -165,12 +172,12 @@ int password(char *zh)  //µÇÂ¼ÃÜÂëÑéÖ¤
 			else
 			{   len=0;
                 printf("buf=%s\n",buf);
-				printf("Äã»¹ÓĞ%d´Î»ú»á\n",cnt);
+				printf("ä½ è¿˜æœ‰%dæ¬¡æœºä¼š\n",cnt);
 				memset(buf,0,sizeof(buf));
 			}
 			
 		}
-		else if(c=='\b')
+		else if(c=='\b')//å›é€€
 		 {
 		 	printf("\b \b");
 		 	if(len>0)
@@ -187,26 +194,26 @@ int password(char *zh)  //µÇÂ¼ÃÜÂëÑéÖ¤
 	}
 	return 0;
 }
-void menu_manager()  //¹ÜÀíÕß²Ëµ¥ 
+void menu_manager()  //ç®¡ç†è€…èœå• 
 {
      int flag=0;
      
-    printf("ÄãºÃÉú²úÕß %s£¬ÇëÑ¡ÔñÄãµÄ·şÎñ£¡\n",now_manager);
+    printf("ä½ å¥½ç”Ÿäº§è€… %sï¼Œè¯·é€‰æ‹©ä½ çš„æœåŠ¡ï¼\n",now_manager);
     if(message_cnt!=0)
     {
-    	printf("ÓĞÏû·ÑÕßÁôÑÔ£¬Çë×¢Òâ²éÊÕ!\n");
+    	printf("æœ‰æ¶ˆè´¹è€…ç•™è¨€ï¼Œè¯·æ³¨æ„æŸ¥æ”¶!\n");
 	}
-    printf(" 1.ÉÏĞÂÒ©Æ·\n");
-    printf(" 2.ÏÂ¼ÜÒ©Æ·\n");
-    printf(" 3.ĞŞ¸ÄÒ©Æ·\n");
-    printf(" 4.²åÈëÒ©Æ·\n"); 
-    printf(" 5.²é¿´ÊÕÒæ\n");
-    printf(" 6.·¢²¼¹«¸æ\n");
-    printf(" 7.ĞŞ¸ÄÃÜÂë\n");
-    printf(" 8.¹ÜÀíÓÃ»§ÕË»§\n"); 
-    printf(" 9. ²é¿´ÁôÑÔ£¡\n");
-    printf(" 10.É¾³ı¹ÜÀíÕß£¡\n");
-    printf(" 11.ÍË³ö\n");
+    printf(" 1.ä¸Šæ–°è¯å“\n");
+    printf(" 2.ä¸‹æ¶è¯å“\n");
+    printf(" 3.ä¿®æ”¹è¯å“\n");
+    printf(" 4.æ’å…¥è¯å“\n"); 
+    printf(" 5.æŸ¥çœ‹æ”¶ç›Š\n");
+    printf(" 6.å‘å¸ƒå…¬å‘Š\n");
+    printf(" 7.ä¿®æ”¹å¯†ç \n");
+    printf(" 8.ç®¡ç†ç”¨æˆ·è´¦æˆ·\n"); 
+    printf(" 9. æŸ¥çœ‹ç•™è¨€ï¼\n");
+    printf(" 10.åˆ é™¤ç®¡ç†è€…ï¼\n");
+    printf(" 11.é€€å‡º\n");
     scanf("%d",&flag);
     switch(flag)
     {
@@ -221,17 +228,17 @@ void menu_manager()  //¹ÜÀíÕß²Ëµ¥
        case 9: show_message();break; 
        case 10: dlete_manager();break;
        case 11: Welcome();break;
-        default: printf("ÇëÊäÈëÕıÈ·µÄ²Ù×÷\n");menu_manager();break;
+        default: printf("è¯·è¾“å…¥æ­£ç¡®çš„æ“ä½œ\n");menu_manager();break;
         
     }
     menu_manager();
 }
 int main() 
-{   //system("color A5");
+{   system("color A5"); //ç»¿åº• 
     
     Welcome();
 }
-void init_medicine() //³õÊ¼»¯Ò©Æ·µÄÁ´±í 
+void init_medicine() //åˆå§‹åŒ–è¯å“çš„é“¾è¡¨ 
 {   FILE *fp;
 head=(struct medicine *)malloc(sizeof(struct medicine));
 head->next=NULL;
@@ -241,19 +248,20 @@ struct medicine *q;
     fp=fopen("medicine.txt","r");
     if(fp==NULL)
     {
-    printf("²»ÄÜ´ò¿ª´ËÎÄ¼ş£¡");
+    printf("ä¸èƒ½æ‰“å¼€æ­¤æ–‡ä»¶ï¼");
     //quit();
     }
     while(!feof(fp))
     {   struct medicine *p=(struct medicine *)malloc(sizeof(struct medicine));
         fscanf(fp,"%s %s %lf",p->num,p->name,&p->price);
+        
         q->next=p;
         q=p;
     }
     q->next=NULL;
     fclose(fp);
 }
-void destory_medicine()  //´İ»ÙÒ©Æ·Á´±í 
+void destory_medicine()  //æ‘§æ¯è¯å“é“¾è¡¨ 
 {
     struct medicine *p=head;
     while(p)
@@ -264,20 +272,20 @@ void destory_medicine()  //´İ»ÙÒ©Æ·Á´±í
     }
 
 }
-void add()  //Ìí¼ÓÒ©Æ·   
+void add()  //æ·»åŠ è¯å“   
 {   
-    printf("µ±±àºÅÊäÈë0 ÍË³öadd\n");
+    printf("å½“ç¼–å·è¾“å…¥0 é€€å‡ºadd\n");
     char bh[10];
     char mz[10];
     double jg;
     struct medicine *p=head->next;
-    while(p&&p->next)
+    while(p&&p->next)  //éå†åˆ°å°¾éƒ¨
     {   
         p=p->next;
     }
     FILE* fp,*fq;
     fp=fopen("medicine.txt","a+");
-    fq=fopen("income.txt","a+");
+     fq =fopen("money.txt","a+");
     while(scanf("%s",bh)==1&&strcmp(bh,"0")!=0)
      {   int flag=0; 
 	    struct medicine *r=head->next;
@@ -288,7 +296,7 @@ void add()  //Ìí¼ÓÒ©Æ·
                char clear[20];
                double cl;
                scanf("%s %lf",clear,&cl);
-                printf("ÒÑ¾­ÓĞ´ËÒ©Æ·£¡\n");
+                printf("å·²ç»æœ‰æ­¤è¯å“ï¼\n");
                 break;
             }
             r=r->next;
@@ -296,9 +304,16 @@ void add()  //Ìí¼ÓÒ©Æ·
         if(flag==1)
         continue;
         struct medicine * q=(struct medicine *)malloc(sizeof(struct medicine));
+        scanf("%s %lf",q->name,&q->price);
+         if(q->price<0)
+         {  free(q); 
+            printf("å®šä»·ä¸èƒ½ä¸ºè´Ÿæ•°ï¼\n");
+            continue;
+         }
+         
         q->next=NULL;
         strcpy(q->num,bh);
-        scanf("%s %lf",q->name,&q->price);
+
         p->next=q;
         p=q;
         fprintf(fp,"%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
@@ -309,18 +324,18 @@ void add()  //Ìí¼ÓÒ©Æ·
     fclose(fp);
     fclose(fq);
 }
-void  check_good() //²éÑ¯Ò©Æ· 
+void  check_good() //æŸ¥è¯¢è¯å“ 
 {   
     int select,flag=0;
-    printf("    Ç×°®µÄÏû·ÑÕß£¬ÇëÑ¡Ôñ²éÕÒ·½Ê½£¡\n");
-    printf("*****Ñ¡Ïî1 ±àºÅ²éÕÒ ******\n");
-    printf("*****Ñ¡Ïî2 Ãû³Æ²éÕÒ ******\n");
-    printf("*****Ñ¡Ïî3 ±àºÅ¼ÓÃû³Æ²éÕÒ ******\n");
-    printf("    *****Ñ¡Ïî4 ÍË³ö ******\n");
+    printf("    äº²çˆ±çš„æ¶ˆè´¹è€…ï¼Œè¯·é€‰æ‹©æŸ¥æ‰¾æ–¹å¼ï¼\n");
+    printf("*****é€‰é¡¹1 ç¼–å·æŸ¥æ‰¾ ******\n");
+    printf("*****é€‰é¡¹2 åç§°æŸ¥æ‰¾ ******\n");
+    printf("*****é€‰é¡¹3 ç¼–å·åŠ åç§°æŸ¥æ‰¾ ******\n");
+    printf("    *****é€‰é¡¹4 é€€å‡º ******\n");
     scanf("%d",&select);
     if(select==1)
     {   char tmp[15];
-        printf("ÇëÊäÈë²éÑ¯±àºÅ\n");
+        printf("è¯·è¾“å…¥æŸ¥è¯¢ç¼–å·\n");
         scanf("%s",tmp);
         struct medicine *p=head;
         while(p->next!=NULL)
@@ -328,7 +343,7 @@ void  check_good() //²éÑ¯Ò©Æ·
             struct medicine *q=p->next;
             if(strcmp(q->num,tmp)==0)
              {   flag=1;
-                 printf("²éÑ¯³É¹¦£¡\n");
+                 printf("æŸ¥è¯¢æˆåŠŸï¼\n");
                  printf("%-8s\t %-8s\t %-8.2f\t\n",q->num,q->name,q->price);
                  break;
              }
@@ -337,14 +352,14 @@ void  check_good() //²éÑ¯Ò©Æ·
         }
           
                 if(flag==0)
-             	printf("²éÑ¯Ê§°Ü£¡\n"); 
+             	printf("æŸ¥è¯¢å¤±è´¥ï¼\n"); 
 			 
         
     }
     
     else if(select==2)
     {   char tmp[15];
-        printf("ÇëÊäÈë²éÑ¯Ò©Æ·Ãû³Æ\n");
+        printf("è¯·è¾“å…¥æŸ¥è¯¢è¯å“åç§°\n");
         scanf("%s",tmp);
         struct medicine *p=head;
         while(p->next!=NULL)
@@ -352,7 +367,7 @@ void  check_good() //²éÑ¯Ò©Æ·
             struct medicine *q=p->next;
             if(strcmp(q->name,tmp)==0)
              {   flag=1;
-                 printf("²éÑ¯³É¹¦£¡\n");
+                 printf("æŸ¥è¯¢æˆåŠŸï¼\n");
                  printf("%-8s\t %-8s\t %-8.2f\t\n",q->num,q->name,q->price);
                  break;
              }
@@ -362,14 +377,14 @@ void  check_good() //²éÑ¯Ò©Æ·
         
           
                 if(flag==0)
-             	printf("²éÑ¯Ê§°Ü£¡\n"); 
+             	printf("æŸ¥è¯¢å¤±è´¥ï¼\n"); 
 			 
  
     }
 
     else if(select==3)
     {   char tmp_num[15],tmp_name[15];
-        printf("ÇëÊäÈë²éÑ¯±àºÅºÍÃû³Æ\n");
+        printf("è¯·è¾“å…¥æŸ¥è¯¢ç¼–å·å’Œåç§°\n");
         scanf("%s %s",tmp_num,tmp_name);
         struct medicine *p=head;
         while(p->next!=NULL)
@@ -377,7 +392,7 @@ void  check_good() //²éÑ¯Ò©Æ·
             struct medicine *q=p->next;
             if(strcmp(q->num,tmp_num)==0&&strcmp(q->name,tmp_name)==0)
              {   flag=1;
-                 printf("²éÑ¯³É¹¦£¡\n");
+                 printf("æŸ¥è¯¢æˆåŠŸï¼\n");
                  printf("%-8s\t %-8s\t %-8.2f\t\n",q->num,q->name,q->price);
                  break;
              }
@@ -386,7 +401,7 @@ void  check_good() //²éÑ¯Ò©Æ·
         }
          
                  if(flag==0)
-             	printf("²éÑ¯Ê§°Ü£¡\n"); 
+             	printf("æŸ¥è¯¢å¤±è´¥ï¼\n"); 
 			 
         
 
@@ -396,29 +411,54 @@ void  check_good() //²éÑ¯Ò©Æ·
     {
        menu_consumer();
     }
+    else{
+        printf("è¯·è¾“å…¥æ­£ç¡®çš„é€‰æ‹©ï¼\n");
+        menu_consumer();
+    }
 
     check_good();
-    
  
     
 }
-void show_all()  //ÏÔÊ¾Ò©µêÒ©Æ·Çåµ¥ 
-{
-	struct medicine * p=head->next;
-	printf("±àºÅ            Ãû³Æ             µ¥¼Û\n");
-    while(p->next&&p)
+void show_all()  //æ˜¾ç¤ºè¯åº—è¯å“æ¸…å• 
+{   int select=0;
+	struct medicine * p=head;
+	 printf("è¯·é€‰æ‹©æ’åºæ–¹æ³•ï¼\n");
+	 printf("***1.å‡åº\n");
+	 printf("***2.é™åº\n"); 
+	 scanf("%d",&select);
+	 if(select==1)
+	  { int flag=0;
+	  	printf("è¯·è¾“å…¥æ’åºå…³é”®å­—ï¼\n");
+	  	printf("***1.ç¼–å·");
+		printf("***2.å•ä»·");
+		scanf("%d",&flag);
+        up_sort(p,flag);
+	  }
+     else if(select==2)
+	  { int flag=0;
+	  	printf("è¯·è¾“å…¥æ’åºå…³é”®å­—ï¼\n");
+	  	printf("***1.ç¼–å·");
+		printf("***2.å•ä»·");
+		scanf("%d",&flag);
+        down_sort(p,flag);
+	  }
+
+     p=p->next;
+	printf("ç¼–å·            åç§°             å•ä»·\n");
+    while(p)
     {
-        
-        printf("%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
+        if(strlen(p->num)!=0)
+        printf("%-14s\t %-14s\t %-14.2f\t\n",p->num,p->name,p->price);
         p=p->next;
     }
 }
-void modify()  //ĞŞ¸ÄÒ©Æ· 
+void modify()  //ä¿®æ”¹è¯å“ 
 {  
    char tmp[20];
    int flag=0;
    int select=0;
-   printf("ÇëÊäÈëÒªĞŞ¸ÄµÄÒ©Æ·±àºÅ(ÊäÈë0ÍË³ö)\n");
+   printf("è¯·è¾“å…¥è¦ä¿®æ”¹çš„è¯å“ç¼–å·(è¾“å…¥0é€€å‡º)\n");
    scanf("%s",&tmp);
    if(strcmp(tmp,"0")==0)
     {
@@ -440,15 +480,15 @@ void modify()  //ĞŞ¸ÄÒ©Æ·
 
          if(flag==0)
         {
-            printf("Ã»ÓĞ´Ë±àºÅ£¡\n");
+            printf("æ²¡æœ‰æ­¤ç¼–å·ï¼\n");
             modify();
         }
         else
     {
-    printf("ÇëÊäÈëÒªĞŞ¸ÄµÄÀàĞÍ£¡\n");
-    printf(" 1.±àºÅ\n");
-    printf(" 2.Ãû³Æ\n");
-    printf(" 3.¼Û¸ñ\n");
+    printf("è¯·è¾“å…¥è¦ä¿®æ”¹çš„ç±»å‹ï¼\n");
+    printf(" 1.ç¼–å·\n");
+    printf(" 2.åç§°\n");
+    printf(" 3.ä»·æ ¼\n");
     scanf("%d",&select);
     FILE*fp;
     fp=fopen("medicine.txt","w+");
@@ -472,6 +512,12 @@ void modify()  //ĞŞ¸ÄÒ©Æ·
         {
             double s;
             scanf("%lf",&s);
+            if(s<0)
+            {
+                printf("ä»·æ ¼ä¸èƒ½ä¸ºè´Ÿæ•°ï¼\n");
+                break;
+            }
+            
             p->price=s;
             break;
         }
@@ -493,7 +539,7 @@ void modify()  //ĞŞ¸ÄÒ©Æ·
 
 
 }
-void get_pwd(char *buf) //ÊäÈëÃÜÂë 
+void get_pwd(char *buf) //è¾“å…¥å¯†ç  
 {  memset(buf,0,sizeof(buf));
    int len=0;
    while(1)
@@ -520,28 +566,28 @@ void get_pwd(char *buf) //ÊäÈëÃÜÂë
 		  }
 }
 }
-void mod_pwd()  //ĞŞ¸ÄÃÜÂë 
+void mod_pwd()  //ä¿®æ”¹å¯†ç  
 {  
    char tmppwd[20],tmpzh[20];
-   printf("ÇëÊäÈëÔ­ÕËºÅ£¡\n");
+   printf("è¯·è¾“å…¥åŸè´¦å·ï¼\n");
    scanf("%s",&tmpzh);
-   printf("ÇëÊäÈëÔ­ÃÜÂë£¡\n");
-   if(!password(tmpzh))
+   printf("è¯·è¾“å…¥åŸå¯†ç ï¼\n");
+   if(!password(tmpzh)) //å¯†ç é”™è¯¯
    {
-      printf("¾¯¸æ£¡£¡£¡£¡\n");
+      printf("è­¦å‘Šï¼ï¼ï¼ï¼\n");
      	 Welcome();
 	
    }
    else
    {
           char new1[20],new2[20];
-           printf("ÇëÊäÈëĞÂÃÜÂë\n");
+           printf("è¯·è¾“å…¥æ–°å¯†ç \n");
            get_pwd(new1);
-           printf("ÇëÈ·ÈÏĞÂÃÜÂë\n");
+           printf("è¯·ç¡®è®¤æ–°å¯†ç \n");
            get_pwd(new2);
            if(strcmp(new1,new2)!=0)
            { 
-             printf("Á½´ÎÊäÈëÃÜÂë²»Ò»ÖÂ£¡ ÇëÖØĞÂÊäÈë£¡\n");
+             printf("ä¸¤æ¬¡è¾“å…¥å¯†ç ä¸ä¸€è‡´ï¼ è¯·é‡æ–°è¾“å…¥ï¼\n");
              mod_pwd();
 
            }
@@ -572,7 +618,7 @@ void mod_pwd()  //ĞŞ¸ÄÃÜÂë
               p=p->next;
           }
         
-                printf("ĞŞ¸ÄÃÜÂë³É¹¦£¡\n");
+                printf("ä¿®æ”¹å¯†ç æˆåŠŸï¼\n");
                 fclose(fp);
 		   }
           
@@ -581,22 +627,22 @@ void mod_pwd()  //ĞŞ¸ÄÃÜÂë
    }
 }
 
-void init_user() //³õÊ¼»¯ÓÃ»§ 
+void init_user() //åˆå§‹åŒ–ç”¨æˆ· 
 {  
     FILE*fp;
     head_c=(struct user *)malloc(sizeof(struct user));
-head_c->next=NULL;
-struct user *q;
-  q=head_c;
+    head_c->next=NULL;
+    struct user *q;
+    q=head_c;
     q->next=NULL;
-    if(id==1)
+    if(id==1)   //åˆ¤æ–­èº«ä»½ 
     fp=fopen("consumer.txt","r");
     else if(id==2)
     fp=fopen("manager.txt","r");
     if(fp==NULL)
     {
-    printf("²»ÄÜ´ò¿ª´ËÎÄ¼ş£¡");
-    //quit();
+    printf("ä¸èƒ½æ‰“å¼€æ­¤æ–‡ä»¶ï¼");
+    Welcome();
     }
     while(!feof(fp))
     {   struct user *p=(struct user *)malloc(sizeof(struct user));
@@ -608,24 +654,34 @@ struct user *q;
     fclose(fp);
 }
 
-void sign_up_user()  //ÓÃ»§×¢²á 
+void sign_up_user()  //ç”¨æˆ·æ³¨å†Œ 
 {
-    printf("ÇëÊäÈëÓÃ»§Ãû\n");
+    printf("è¯·è¾“å…¥ç”¨æˆ·å\n");
     char zh[20];
     scanf("%s",zh);
+    struct user * p=head_c->next;
+    while(p)
+    {
+        if(strcmp(p->zh,zh)==0)
+        {
+            printf("å·²å­˜åœ¨ç”¨æˆ·ï¼\n");
+            Welcome();
+        }
+        p=p->next;
+    }
      char new1[20],new2[20];
      memset(new1,0,sizeof(new1));
      memset(new2,0,sizeof(new2));
-           printf("ÇëÊäÈëÃÜÂë\n");
+           printf("è¯·è¾“å…¥å¯†ç \n");
            get_pwd(new1);
            fflush(stdin);
            printf("\n");
-           printf("ÇëÈ·ÈÏĞÂÃÜÂë\n");
+           printf("è¯·ç¡®è®¤æ–°å¯†ç \n");
            get_pwd(new2);
            fflush(stdin);
            if(strcmp(new1,new2)!=0)
            {   
-		   printf("ÃÜÂë´íÎó£¡\n");
+		   printf("å¯†ç é”™è¯¯ï¼\n");
                Welcome();
            }
            else
@@ -657,10 +713,10 @@ void sign_up_user()  //ÓÃ»§×¢²á
      
 }
 
-void login_user()  //ÓÃ»§µÇÂ¼ 
+void login_user()  //ç”¨æˆ·ç™»å½• 
 {   
     int flag=0;
-    printf("ÇëÊäÈëÕËºÅ:\n");
+    printf("è¯·è¾“å…¥è´¦å·:\n");
     char zh[20];
     char tm_zh[20],tm_pwd[20];
     scanf("%s",&zh);
@@ -682,8 +738,8 @@ void login_user()  //ÓÃ»§µÇÂ¼
             flag=1;
         }
     }
-    if(flag==0&&id==1)
-    { printf("Ç×°®µÄÓÃ»§ÏÖÔÚÄúÉĞÎ´ÓĞÕË»§£¬ÊÇ·ñ×¢²á£¿ y/n\n");
+    if(flag==0&&id==1)  //ç”¨æˆ·æœªæ³¨å†Œ
+    { printf("äº²çˆ±çš„ç”¨æˆ·ç°åœ¨æ‚¨å°šæœªæœ‰è´¦æˆ·ï¼Œæ˜¯å¦æ³¨å†Œï¼Ÿ y/n\n");
       getchar();
       char c;
       scanf("%c",&c);
@@ -697,8 +753,8 @@ void login_user()  //ÓÃ»§µÇÂ¼
       }
       
     }
-    else if(flag==0&&id==2)
-    {   printf("Ç×°®µÄ¹ÜÀíÕßÏÖÔÚÄúÉĞÎ´ÓĞÕË»§£¬ÊÇ·ñ×¢²á£¿ y/n\n");
+    else if(flag==0&&id==2)  //ç®¡ç†è€…æœªæ³¨å†Œ
+    {   printf("äº²çˆ±çš„ç®¡ç†è€…ç°åœ¨æ‚¨å°šæœªæœ‰è´¦æˆ·ï¼Œæ˜¯å¦æ³¨å†Œï¼Ÿ y/n\n");
          getchar();
         char c;
         scanf("%c",&c);
@@ -711,37 +767,48 @@ void login_user()  //ÓÃ»§µÇÂ¼
         add_manager();
       }
 	}
-    else
-    { printf("ÇëÊäÈëÃÜÂë\n");
+    else //å·²æœ‰è´¦å·
+    { printf("è¯·è¾“å…¥å¯†ç \n");
       if(!password(zh))
       {
-          printf("µÇÂ¼Ê§°Ü£¡\n");
+          printf("ç™»å½•å¤±è´¥ï¼\n");
           Welcome();
       }
       else 
       {
-          printf("Welcome ÓÃ»§ :%s\n",zh);
+          printf("Welcome ç”¨æˆ· :%s\n",zh);
       }
     }
 
 }
 
-void insert_medicine() //²åÈëÒ©Æ· 
+void insert_medicine() //æ’å…¥è¯å“ 
 {  
    int flag=0;
    struct medicine *p=head;
    char num[20];
    char tmp_num[20],tmp_name[20];
    double tmp_price;
-   printf("ÇëÊäÈë²åÈëµÄÊı¾İ!(ÊäÈë-1ÍË³ö)\n");
+   printf("è¯·è¾“å…¥æ’å…¥çš„æ•°æ®!(è¾“å…¥-1é€€å‡º)\n");
     scanf("%s",tmp_num);
+    
     if(strcmp(tmp_num,"-1")==0)
      {
          return;
      }
    scanf("%s %lf",tmp_name,&tmp_price);
-   printf("ÇëÊäÈëÏë²åÈëµÄ¶ÔÏó±àºÅ£¡(ÊäÈë 0²åÈëµ½Í·²¿)\n");
+    while(p&&p->next)
+   {
+       if(strcmp(p->num,tmp_num)==0)
+       { printf("æ­¤å¯¹è±¡å·²å­˜åœ¨ï¼\n");
+          return;
+       }
+       p=p->next;
+   }
+   printf("è¯·è¾“å…¥æƒ³æ’å…¥çš„å¯¹è±¡ç¼–å·ï¼(è¾“å…¥ 0æ’å…¥åˆ°å¤´éƒ¨)\n");
    scanf("%s",num);
+   p=head;
+   
    while(p&&p->next)
    {
        if(strcmp(p->num,num)==0)
@@ -753,7 +820,7 @@ void insert_medicine() //²åÈëÒ©Æ·
    }
    if(flag==0&&strcmp(num,"0")!=0)
    {
-       printf("Ã»ÓĞ´Ë¶ÔÏó£¡\n");
+       printf("æ²¡æœ‰æ­¤å¯¹è±¡ï¼\n");
        return;
       
    }
@@ -779,9 +846,10 @@ void insert_medicine() //²åÈëÒ©Æ·
    }
       FILE* fp;
       fp=fopen("medicine.txt","w");
+       
       p=head->next;
       while(p&&p->next)
-      {   printf("1\n");
+      {  
           fprintf(fp,"%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
           p=p->next;
       }
@@ -791,12 +859,12 @@ void insert_medicine() //²åÈëÒ©Æ·
 
 }
 
-void dlete_medicine() //É¾³ıÒ©Æ· 
+void dlete_medicine() //åˆ é™¤è¯å“ 
 {   
     char num[20];
     char yao[20];
     int flag=0;
-    printf("ÇëÊäÈëÏëÉ¾³ıµÄ±àºÅ(ÊäÈë0ÍË³ö)\n");
+    printf("è¯·è¾“å…¥æƒ³åˆ é™¤çš„ç¼–å·(è¾“å…¥0é€€å‡º)\n");
     scanf("%s",num);
     if(strcmp(num,"0")==0)
      {
@@ -815,7 +883,7 @@ void dlete_medicine() //É¾³ıÒ©Æ·
     }
     if(flag==0)
     {
-        printf("Ã»ÓĞ´ËÒ©Æ·£¡\n");
+        printf("æ²¡æœ‰æ­¤è¯å“ï¼\n");
     }
     else
     {
@@ -839,18 +907,18 @@ void dlete_medicine() //É¾³ıÒ©Æ·
         fp=fopen("medicine.txt","w+");
 
         p=head->next;
-        while(p&&p->next)
+        while(p&&p->next) //é‡æ–°å†™å…¥
         {  fprintf(fp,"%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
             p=p->next;
         }
         fclose(fp);
-        printf("É¾³ıÒ©Æ·%s ³É¹¦£¡\n",yao);
+        printf("åˆ é™¤è¯å“%s æˆåŠŸï¼\n",yao);
 
     }
 }
 
 
-void dlete_user() //É¾³ıÓÃ»§ 
+void dlete_user() //åˆ é™¤ç”¨æˆ· 
 {  
    char bh[20];
    int flag=0;
@@ -868,7 +936,7 @@ void dlete_user() //É¾³ıÓÃ»§
    }
    q->next=NULL;
    
-   printf("ÇëÊäÈëÒªÉ¾³ıµÄ±àºÅ\n");
+   printf("è¯·è¾“å…¥è¦åˆ é™¤çš„ç¼–å·\n");
    scanf("%s",bh);
    p=head_tmp;
    while(p->next)
@@ -883,10 +951,10 @@ void dlete_user() //É¾³ıÓÃ»§
     
    if(flag==0)
    {
-   	printf("Ã»ÓĞ´ËÓÃ»§£¡\n");
+   	printf("æ²¡æœ‰æ­¤ç”¨æˆ·ï¼\n");
    }
    else if(flag==1)
-    {     id=1;
+    {     id=1; //å› ä¸ºæ˜¯åœ¨ç®¡ç†è€…
         
 		
 		
@@ -915,15 +983,15 @@ void dlete_user() //É¾³ıÓÃ»§
         fclose(fp);
 	}
 	   id=2;
-	   p=head_tmp->next;
-       while(p)
+	   p=head_tmp;
+       while(p->next)
        {
        	struct user *tmp;
        	tmp=p->next;
        	free(p);
-       	p=p->next;
+       	p=tmp;
 	   }
-	   free(head_tmp);
+	  
    
    
    
@@ -931,7 +999,7 @@ void dlete_user() //É¾³ıÓÃ»§
    
 }
 
-void purchase() //¹ºÂòÒ©Æ· 
+void purchase() //è´­ä¹°è¯å“ 
 {   
     char bh[20];
     int cnt[60000];
@@ -940,18 +1008,23 @@ void purchase() //¹ºÂòÒ©Æ·
     struct medicine *head_p =(struct medicine *)malloc(sizeof(struct medicine));
     head_p->next=NULL;
     int select=0;
-    printf("*************ÇëÊäÈëÒª¹ºÂòµÄÒ©Æ·Ãû³Æ!******************\n");
-    printf("*** ÊäÈë0½áÊø¹ºÂò£¡***\n");
-    printf("*** ÊäÈë1¹ºÂò£¡***\n");
-    printf("*** ÊäÈë-1ĞŞ¸Ä¹ºÂòÇåµ¥µÄÄ³Ò»Ïî£¡***\n");
+    printf("*************è¯·è¾“å…¥è¦è´­ä¹°çš„è¯å“åç§°!******************\n");
+    printf("*** è¾“å…¥0ç»“æŸè´­ä¹°ï¼***\n");
+    printf("*** è¾“å…¥1è´­ä¹°ï¼***\n");
+    printf("*** è¾“å…¥-1ä¿®æ”¹è´­ä¹°æ¸…å•çš„æŸä¸€é¡¹ï¼***\n");
     while(scanf("%d",&select)==1&&select!=0)
 
     {   
-        if(select==0)
-        {
+        if(select!=1&&select!=-1)
+        {   if(select!=0)
+            {
+            	printf("è¾“å…¥é”™è¯¯ï¼\n");
+            	printf("è¯·é‡æ–°è¾“å…¥é€‰æ‹©ï¼\n");
+            	continue;
+			}
             break;
         }
-        printf("ÇëÊäÈëÒª¹ºÂò/É¾³ıµÄ±àºÅ£¡\n");
+        printf("è¯·è¾“å…¥è¦è´­ä¹°/åˆ é™¤çš„ç¼–å·ï¼\n");
         scanf("%s",bh);
         int flag=0;
         struct medicine * p=head->next;
@@ -960,7 +1033,7 @@ void purchase() //¹ºÂòÒ©Æ·
             
             if(strcmp(p->num,bh)==0)
              {   flag=1;
-                 printf("²éÑ¯³É¹¦£¡\n");
+                 printf("æŸ¥è¯¢æˆåŠŸï¼\n");
                  printf("%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price);
                  break;
              }
@@ -969,17 +1042,17 @@ void purchase() //¹ºÂòÒ©Æ·
         }
         if(flag==0)
         {
-            printf("Ã»ÓĞ´ËÒ©Æ·£¡ÇëÖØĞÂÊäÈë£¡\n");
+            printf("æ²¡æœ‰æ­¤è¯å“ï¼è¯·é‡æ–°è¾“å…¥ï¼\n");
 
         }
         else
         {   if(select==1)
             {
               int count=0;
-              printf("ÇëÊäÈë¹ºÂòÊıÁ¿£¡\n");
+              printf("è¯·è¾“å…¥è´­ä¹°æ•°é‡ï¼\n");
               scanf("%d",&count);
               
-            printf("ÇëÈ·ÈÏÊÇ·ñ¹ºÂò£¿y/n\n"); 
+            printf("è¯·ç¡®è®¤æ˜¯å¦è´­ä¹°ï¼Ÿy/n\n"); 
             char c;
             getchar();
             scanf("%c",&c);
@@ -1006,7 +1079,7 @@ void purchase() //¹ºÂòÒ©Æ·
             }
             else if(select==-1)
             {
-                 printf("ÇëÈ·ÈÏÊÇ·ñÉ¾³ı£¿y/n\n");
+                 printf("è¯·ç¡®è®¤æ˜¯å¦åˆ é™¤ï¼Ÿy/n\n");
                  getchar();
                  char c;
                  c=getchar();
@@ -1033,29 +1106,31 @@ void purchase() //¹ºÂòÒ©Æ·
            }
 
         }
-           printf("*************ÇëÊäÈëÒª¹ºÂòµÄÒ©Æ·Ãû³Æ!******************\n");
-          printf("*** ÊäÈë0½áÊø¹ºÂò£¡***\n");
-         printf("*** ÊäÈë1¹ºÂò£¡***\n");
-        printf("*** ÊäÈë-1ĞŞ¸Ä¹ºÂòÇåµ¥µÄÄ³Ò»Ïî£¡***\n");
+           printf("*************è¯·è¾“å…¥è¦è´­ä¹°çš„è¯å“åç§°!******************\n");
+          printf("*** è¾“å…¥0ç»“æŸè´­ä¹°ï¼***\n");
+         printf("*** è¾“å…¥1è´­ä¹°ï¼***\n");
+        printf("*** è¾“å…¥-1ä¿®æ”¹è´­ä¹°æ¸…å•çš„æŸä¸€é¡¹ï¼***\n");
     }
 
-      printf("¹ºÂòÈçÏÂ::\n");
-      up_BubbleSort(head_p);; //ÉıĞòÅÅĞò
+      printf("è´­ä¹°å¦‚ä¸‹::\n");
+      up_sort(head_p,3);//å‡åºæ’åº
       struct medicine * p=head_p->next;
 
-      double all_price=0;
+      double all_price=0; //æ€»å…±èŠ±å¤šå°‘é’±
 	   while(p)
         { 
         all_price+=p->price*cnt[atoi(p->num)];
         printf("%-8s\t %-8s\t %-8.2f\t\n",p->num,p->name,p->price*cnt[atoi(p->num)]);
         p=p->next;
         }
-        printf("ÇëÈ·ÈÏÊÇ·ñ¹ºÂò£¡y/n\n");
+        printf("%.2få…ƒ!\n",all_price);
+        printf("è¯·ç¡®è®¤æ˜¯å¦è´­ä¹°ï¼y/n\n");
         getchar();
         char c;
         c=getchar();
         if(c=='y')
-        {   FILE* fp=fopen("income.txt","r");
+        {    
+		    FILE* fp=fopen("money.txt","r");
             struct medicine *head_i=(struct medicine*)malloc(sizeof(struct medicine));
             head_i->next=NULL;
             struct medicine *r;
@@ -1072,7 +1147,7 @@ void purchase() //¹ºÂòÒ©Æ·
            
             r->next=NULL;
             fclose(fp);
-            fp=fopen("income.txt","w");
+            fp=fopen("money.txt","w");
             r=head_i->next;
             while(r&&r->next)
             {
@@ -1082,7 +1157,7 @@ void purchase() //¹ºÂòÒ©Æ·
             fclose(fp);
 
            
-            printf("%.2fÔª£¡¸ĞĞ»ÄúµÄ»İ¹Ë£¡\n",all_price);
+            printf("%.2få…ƒï¼æ„Ÿè°¢æ‚¨çš„æƒ é¡¾ï¼\n",all_price);
             r=head_i;
             while(r->next)
              {
@@ -1096,23 +1171,24 @@ void purchase() //¹ºÂòÒ©Æ·
 
 }
 
-void check_income()  //Í³¼ÆÊÕÒæ 
+void check_income()  //ç»Ÿè®¡æ”¶ç›Š 
 {  
    int select=0;
    double all_price=0,part_price=0;
-   printf("**********ÇëÑ¡ÔñÍ³¼ÆÀàĞÍ£¡*************\n");
-   printf("***** ****1.Í³¼Æ×ÜÊÕÒæ£¡*********\n");
-   printf("**********2.Í³¼ÆÊÛ³öÊıÁ¿´óÓÚ£¨£©\n");
-   printf("**********3.Í³¼Æ¼Û¸ñ´óÓÚ£¨£©²¢ÇÒ³öÊÛ×ÜÖµ£¨£©´óÓÚ£¨£©µÄÉÌÆ·£¡***********************\n");
+   printf("**********è¯·é€‰æ‹©ç»Ÿè®¡ç±»å‹ï¼*************\n");
+   printf("***** ****1.ç»Ÿè®¡æ€»æ”¶ç›Šï¼*********\n");
+   printf("**********2.ç»Ÿè®¡å”®å‡ºæ•°é‡å¤§äºï¼ˆï¼‰\n");
+   printf("**********3.ç»Ÿè®¡ä»·æ ¼å¤§äºï¼ˆï¼‰å¹¶ä¸”å‡ºå”®æ€»å€¼ï¼ˆï¼‰å¤§äºï¼ˆï¼‰çš„å•†å“ï¼***********************\n");
    scanf("%d",&select);
-   FILE* fp=fopen("income.txt","r");
+   FILE* fp=fopen("money.txt","r");
             struct medicine *head_i=(struct medicine*)malloc(sizeof(struct medicine));
             head_i->next=NULL;
             struct medicine *r;
             r=head_i;
             while(!feof(fp))
             {  struct medicine *tmp=(struct medicine *)malloc(sizeof(struct medicine));
-               fscanf(fp,"%s %s %lf %d %lf",tmp->num,tmp->name,&tmp->price,&tmp->cnt,&tmp->total);
+               fscanf(fp,"%s %s %lf %d %lf",tmp->num,&tmp->name,&tmp->price,&tmp->cnt,&tmp->total);
+              
                all_price+=tmp->total;
                r->next=tmp;
                r=tmp;
@@ -1123,37 +1199,39 @@ void check_income()  //Í³¼ÆÊÕÒæ
 
    if(select==1)
    {
-      printf("×ÜÊÕÈë:\n");
-      printf("%.2fÔª!\n",all_price);
-      up_BubbleSort(head_i);
-      r=head_i->next->next; 
-      printf("±àºÅ            Ãû³Æ             µ¥¼Û           ÊıÁ¿             ×Ü¼Û  \n");
+      printf("æ€»æ”¶å…¥:\n");
+      printf("%.2få…ƒ!\n",all_price);
+      struct medicine *tmp=head_i;
+      up_sort(tmp,3);
+      r=tmp->next; 
+      printf("ç¼–å·            åç§°             å•ä»·           æ•°é‡             æ€»ä»·  \n");
       while(r)
-       {
+       { if(strlen(r->num)!=0)
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
         r=r->next;
         }
    }
    else if(select==2)
    { int cnt=0;
-   	printf("ÇëÊäÈëÊÛ³ö×ÜÊıÏŞÖÆ\n");
+   	printf("è¯·è¾“å…¥å”®å‡ºæ€»æ•°é™åˆ¶\n");
    	scanf("%d",&cnt);
-     up_BubbleSort(head_i);
-      r=head_i->next->next; 
+    struct medicine *tmp=head_i;
+      up_sort(tmp,3);
+      r=tmp->next;  
        while(r)
        {
            if(r->cnt>=cnt)
-           {
+           {  
                part_price+=r->total;
            }
            r=r->next;
        }
-      printf("²¿·Ö×ÜÊÕÈë:\n");
-      printf("%.2fÔª!\n",part_price);
+      printf("éƒ¨åˆ†æ€»æ”¶å…¥:\n");
+      printf("%.2få…ƒ!\n",part_price);
       r=head_i->next->next;
-       printf("±àºÅ            Ãû³Æ             µ¥¼Û           ÊıÁ¿             ×Ü¼Û  \n");
+       printf("ç¼–å·            åç§°             å•ä»·           æ•°é‡             æ€»ä»·  \n");
       while(r)
-       {  if(r->cnt>=cnt)
+       {  if(r->cnt>=cnt&&(strlen(r->num)!=0))
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
         r=r->next;
         }
@@ -1162,24 +1240,25 @@ void check_income()  //Í³¼ÆÊÕÒæ
 	} 
    else if(select==3)
    {   double price=0,total=0;
-       printf("ÇëÊäÈëµ¥¼ÛÏŞÖÆ!\n");
+       printf("è¯·è¾“å…¥å•ä»·é™åˆ¶!\n");
        scanf("%lf",&price);
-       printf("ÇëÊäÈë³öÊÛ×ÜÖµÏŞÖÆ£¡\n");
+       printf("è¯·è¾“å…¥å‡ºå”®æ€»å€¼é™åˆ¶ï¼\n");
        scanf("%lf",&total);
-        up_BubbleSort(head_i);
-      r=head_i->next->next; 
+        struct medicine *tmp=head_i;
+        up_sort(tmp,3);
+        r=tmp->next; 
        while(r)
        {
-           if(r->total>=total&&r->price>=price)
+           if(r->total>=total&&r->price>=price&&(strlen(r->num)!=0))
            {
                part_price+=r->total;
            }
            r=r->next;
        }
-      printf("²¿·Ö×ÜÊÕÈë:\n");
-      printf("%.2fÔª!\n",part_price);
+      printf("éƒ¨åˆ†æ€»æ”¶å…¥:\n");
+      printf("%.2få…ƒ!\n",part_price);
       r=head_i->next->next;
-       printf("±àºÅ            Ãû³Æ             µ¥¼Û           ÊıÁ¿             ×Ü¼Û  \n");
+       printf("ç¼–å·            åç§°             å•ä»·           æ•°é‡             æ€»ä»·  \n");
       while(r)
        { if(r->total>=total&&r->price>=price)
         printf("%-8s\t %-8s\t %-8.2f\t %-8d\t %-8.2f\t\n",r->num,r->name,r->price,r->cnt,r->total);
@@ -1205,7 +1284,7 @@ void check_income()  //Í³¼ÆÊÕÒæ
 void notice()
 {   char s[200];
     FILE *fp=fopen("notice.txt","a+");
-	printf("ÇëÊäÈëÄãÏëÊäÈëµÄ¸æÊ¾£¡(ÊäÈë0ÍË³ö)\n");
+	printf("è¯·è¾“å…¥ä½ æƒ³è¾“å…¥çš„å‘Šç¤ºï¼(è¾“å…¥0é€€å‡º)\n");
 	while(scanf("%s",s)==1&&strcmp(s,"0")!=0)
 	{ notice_cnt++;
 	  fprintf(fp,"%s\n",s);	
@@ -1217,7 +1296,7 @@ void notice()
 void message()
 {   char s[200];
     FILE *fp=fopen("message.txt","a+");
-	printf("ÇëÊäÈëÄãÏëÊäÈëµÄÁôÑÔ£¡(ÊäÈë0ÍË³ö)\n");
+	printf("è¯·è¾“å…¥ä½ æƒ³è¾“å…¥çš„ç•™è¨€ï¼(è¾“å…¥0é€€å‡º)\n");
 	while(scanf("%s",s)==1&&strcmp(s,"0")!=0)
 	{ message_cnt++;
 	  fprintf(fp,"%s %s\n",tmp_zh,s);	
@@ -1235,7 +1314,7 @@ void show_notice()
 		printf("notice:%s\n",s);
 	}
 	fclose(fp);
-	fp=fopen("notice.txt","w");
+	fp=fopen("notice.txt","w"); //è¯»å®Œæ¸…ç©ºæ–‡ä»¶
 	fclose(fp);
 	notice_cnt=0;
  } 
@@ -1248,7 +1327,7 @@ void show_notice()
 		printf("message from %s :%s\n",zh,s);
 	}
 	fclose(fp);
-	fp=fopen("message.txt","w");
+	fp=fopen("message.txt","w"); //è¯»å®Œæ¸…ç©ºæ–‡ä»¶
 	fclose(fp);
 	message_cnt=0; 
  } 
@@ -1256,28 +1335,40 @@ void show_notice()
  void add_manager()
  {
  	FILE* fp;
-    printf("ÇëÊäÈësudoÃÜÂë!\n");
+    printf("è¯·è¾“å…¥sudoå¯†ç !\n");
     char pwd[20];
 	get_pwd(pwd);
 	if(strcmp(pwd,sudo)!=0)
 	 {
-	 	printf("ÃÜÂë´íÎó£¡\n");
+	 	printf("å¯†ç é”™è¯¯ï¼\n");
          Welcome();
 	  } 
 	 else
 	{   char zh[20],mm[20];
 		FILE*fp;
-		fp=fopen("manager.txt","a");
-		printf("ÇëÊäÈëÏëÌí¼ÓµÄ¹ÜÀíÕß£¡\n");
+		fp=fopen("manager.txt","r");
+		printf("è¯·è¾“å…¥æƒ³æ·»åŠ çš„ç®¡ç†è€…ï¼\n");
 		scanf("%s",zh);
+		while(!feof(fp))
+		 {  char zhh[20],mmm[20];
+		 	fscanf(fp,"%s %s",zhh,mmm);
+		 	if(strcmp(zhh,zh)==0)
+		 	{
+		 		printf("æ­¤ç®¡ç†è€…å·²å­˜åœ¨ï¼\n");
+		 		Welcome();
+			 }
+		 	
+		 }
+		 fclose(fp);
+		 fp=fopen("manager.txt","a");
 		char new1[20],new2[20];
-           printf("ÇëÊäÈëĞÂÃÜÂë\n");
+           printf("è¯·è¾“å…¥æ–°å¯†ç \n");
            get_pwd(new1);
-           printf("ÇëÈ·ÈÏĞÂÃÜÂë\n");
+           printf("è¯·ç¡®è®¤æ–°å¯†ç \n");
            get_pwd(new2);
            if(strcmp(new1,new2)!=0)
-           { printf("%s | %s\n",new1,new2);
-             printf("Á½´ÎÊäÈëÃÜÂë²»Ò»ÖÂ!\n");
+           { //printf("%s | %s\n",new1,new2);
+             printf("ä¸¤æ¬¡è¾“å…¥å¯†ç ä¸ä¸€è‡´!\n");
              Welcome();
              
            }
@@ -1293,17 +1384,17 @@ void show_notice()
  } 
  
  
- void dlete_manager() //É¾³ıÓÃ»§ 
+ void dlete_manager() //åˆ é™¤ç”¨æˆ· 
 {  
    char bh[20];
    int flag=0;
    struct user * head_tmp,*q,*p,*tmp;
-   printf("ÇëÊäÈësudo ÃÜÂë£¡\n");
+   printf("è¯·è¾“å…¥sudo å¯†ç ï¼\n");
    char pwd[20];
    get_pwd(pwd);
    if(strcmp(pwd,sudo)!=0)
    { 
-   	printf("sudoÃÜÂë´íÎó£¡\n");
+   	printf("sudoå¯†ç é”™è¯¯ï¼\n");
    	return;
 	} 
    head_tmp=(struct user *)malloc(sizeof(struct user));
@@ -1319,7 +1410,7 @@ void show_notice()
    }
    q->next=NULL;
    
-   printf("ÇëÊäÈëÒªÉ¾³ıµÄ±àºÅ\n");
+   printf("è¯·è¾“å…¥è¦åˆ é™¤çš„ç¼–å·\n");
    scanf("%s",bh);
    p=head_tmp;
    while(p->next)
@@ -1336,7 +1427,7 @@ void show_notice()
     
    if(flag==0)
    {
-   	printf("Ã»ÓĞ¹ÜÀíÕß£¡\n");
+   	printf("æ²¡æœ‰ç®¡ç†è€…ï¼\n");
    }
    else if(flag==1)
     {    
@@ -1383,8 +1474,8 @@ void show_notice()
    
    
 }
-void logout()
-{   printf("ÇëÈıË¼£¡ y/n\n");
+void logout()  //æ³¨é”€ç”¨æˆ·
+{   printf("è¯·ä¸‰æ€ï¼ y/n\n");
     char c;
     getchar();
     c=getchar();
@@ -1394,10 +1485,10 @@ void logout()
 
     }
     else 
-    { printf("ÇëÊäÈëÃÜÂë£¡\n");
+    { printf("è¯·è¾“å…¥å¯†ç ï¼\n");
     if(!password(now_user))
     {
-        printf("ÃÜÂë´íÎó£¡\n");
+        printf("å¯†ç é”™è¯¯ï¼\n");
     }
     else
     {   
@@ -1457,70 +1548,110 @@ void logout()
 	   }
 	   
 	   free(head_tmp);
-        printf("Ç×°®µÄ%s ÓÃ»§£¬ÎÒÃÇÓĞÔµÔÙ¼û!\n",now_user);
+        printf("äº²çˆ±çš„%s ç”¨æˆ·ï¼Œæˆ‘ä»¬æœ‰ç¼˜å†è§!\n",now_user);
     }
 }
 }
 
-void up_BubbleSort(struct medicine * L)
+void up_sort(struct medicine * L,int flag)
 {
-	int i ,count = 0, num;//count¼ÇÂ¼Á´±í½áµãµÄ¸öÊı£¬num½øĞĞÄÚ²ãÑ­»·£¬
-	struct medicine  *p, *q, *tail;//´´½¨Èı¸öÖ¸Õë£¬½øĞĞÃ°ÅİÅÅĞò
+	int i ,count = 0, num;//countè®°å½•é“¾è¡¨ç»“ç‚¹çš„ä¸ªæ•°ï¼Œnumè¿›è¡Œå†…å±‚å¾ªç¯ï¼Œ
+	struct medicine  *p, *q, *tail;//åˆ›å»ºä¸‰ä¸ªæŒ‡é’ˆï¼Œè¿›è¡Œå†’æ³¡æ’åº
 	p = L;
-	while(p->next != NULL)//¼ÆËã³ö½áµãµÄ¸öÊı
+	while(p->next != NULL)//è®¡ç®—å‡ºç»“ç‚¹çš„ä¸ªæ•°
 	{
-		count++;//×¢ÊÍ¢Ù
+		count++;
 		p = p->next;
 	}
-	for(i = 0; i < count - 1; i++)//Íâ²ãÑ­»·£¬¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù
+	for(i = 0; i < count - 1; i++)//å¤–å±‚å¾ªç¯ï¼Œè·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·
 	{
-		num = count - i - 1;//¼ÇÂ¼ÄÚ²ãÑ­»·ĞèÒªµÄ´ÎÊı£¬¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù£¬
-		q = L->next;//ÁîqÖ¸ÏòµÚÒ»¸ö½áµã
-		p = q->next;//ÁîpÖ¸ÏòºóÒ»¸ö½áµã
-		tail = L;//ÈÃtailÊ¼ÖÕÖ¸ÏòqÇ°Ò»¸ö½áµã£¬·½±ã½»»»£¬Ò²·½±ãÓë½øĞĞÏÂÒ»²½²Ù×÷
-		while(num--)//ÄÚ²ãÑ­»· ´ÎÊı¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù
+		num = count - i - 1;//è®°å½•å†…å±‚å¾ªç¯éœ€è¦çš„æ¬¡æ•°ï¼Œè·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·ï¼Œ
+		q = L->next;//ä»¤qæŒ‡å‘ç¬¬ä¸€ä¸ªç»“ç‚¹
+		p = q->next;//ä»¤pæŒ‡å‘åä¸€ä¸ªç»“ç‚¹
+		tail = L;//è®©tailå§‹ç»ˆæŒ‡å‘qå‰ä¸€ä¸ªç»“ç‚¹ï¼Œæ–¹ä¾¿äº¤æ¢ï¼Œä¹Ÿæ–¹ä¾¿ä¸è¿›è¡Œä¸‹ä¸€æ­¥æ“ä½œ
+		while(num--)//å†…å±‚å¾ªç¯ æ¬¡æ•°è·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·
 		{
-			if(q->total > p->total)//Èç¹û¸Ã½áµãµÄÖµ´óÓÚºóÒ»¸ö½áµã£¬Ôò½»»»
+			if(flag==1) //æŒ‰ç¼–å·
+            {
+			if(atoi(q->num)>atoi(p->num))
 			{
 				q->next = p->next;
 				p->next = q;
 				tail->next = p;
 			}
-			tail = tail->next;//×¢ÊÍ¢Ú
-			q = tail->next;//×¢ÊÍ¢Ú
-			p = q->next;//×¢ÊÍ¢Ú
-		 } 
-	} 
-}
-
-void down_BubbleSort(struct medicine * L)
-{
-	int i ,count = 0, num;//count¼ÇÂ¼Á´±í½áµãµÄ¸öÊı£¬num½øĞĞÄÚ²ãÑ­»·£¬
-	struct medicine  *p, *q, *tail;//´´½¨Èı¸öÖ¸Õë£¬½øĞĞÃ°ÅİÅÅĞò
-	p = L;
-	while(p->next != NULL)//¼ÆËã³ö½áµãµÄ¸öÊı
-	{
-		count++;//×¢ÊÍ¢Ù
-		p = p->next;
-	}
-	for(i = 0; i < count - 1; i++)//Íâ²ãÑ­»·£¬¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù
-	{
-		num = count - i - 1;//¼ÇÂ¼ÄÚ²ãÑ­»·ĞèÒªµÄ´ÎÊı£¬¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù£¬
-		q = L->next;//ÁîqÖ¸ÏòµÚÒ»¸ö½áµã
-		p = q->next;//ÁîpÖ¸ÏòºóÒ»¸ö½áµã
-		tail = L;//ÈÃtailÊ¼ÖÕÖ¸ÏòqÇ°Ò»¸ö½áµã£¬·½±ã½»»»£¬Ò²·½±ãÓë½øĞĞÏÂÒ»²½²Ù×÷
-		while(num--)//ÄÚ²ãÑ­»· ´ÎÊı¸úÊı×éÃ°ÅİÅÅĞòÒ»Ñù
-		{
-			if(q->total < p->total)//Èç¹û¸Ã½áµãµÄÖµ´óÓÚºóÒ»¸ö½áµã£¬Ôò½»»»
+            }
+            if(flag==2) //æŒ‰å•ä»·
+            {
+			if(q->price>p->price)
 			{
 				q->next = p->next;
 				p->next = q;
 				tail->next = p;
 			}
-			tail = tail->next;//×¢ÊÍ¢Ú
-			q = tail->next;//×¢ÊÍ¢Ú
-			p = q->next;//×¢ÊÍ¢Ú
+            }
+            if(flag==3) //æŒ‰æ€»ä»·
+            {
+			if(q->total>p->total)
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+            }
+			tail = tail->next;
+			q = tail->next;
+			p = q->next;
 		 } 
 	} 
 }
 
+void down_sort(struct medicine * L,int flag)
+{
+	int i ,count = 0, num;//countè®°å½•é“¾è¡¨ç»“ç‚¹çš„ä¸ªæ•°ï¼Œnumè¿›è¡Œå†…å±‚å¾ªç¯ï¼Œ
+	struct medicine  *p, *q, *tail;//åˆ›å»ºä¸‰ä¸ªæŒ‡é’ˆï¼Œè¿›è¡Œå†’æ³¡æ’åº
+	p = L;
+	while(p->next != NULL)//è®¡ç®—å‡ºç»“ç‚¹çš„ä¸ªæ•°
+	{
+		count++;
+		p = p->next;
+	}
+	for(i = 0; i < count - 1; i++)//å¤–å±‚å¾ªç¯ï¼Œè·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·
+	{
+		num = count - i - 1;//è®°å½•å†…å±‚å¾ªç¯éœ€è¦çš„æ¬¡æ•°ï¼Œè·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·ï¼Œ
+		q = L->next;//ä»¤qæŒ‡å‘ç¬¬ä¸€ä¸ªç»“ç‚¹
+		p = q->next;//ä»¤pæŒ‡å‘åä¸€ä¸ªç»“ç‚¹
+		tail = L;//è®©tailå§‹ç»ˆæŒ‡å‘qå‰ä¸€ä¸ªç»“ç‚¹ï¼Œæ–¹ä¾¿äº¤æ¢ï¼Œä¹Ÿæ–¹ä¾¿ä¸è¿›è¡Œä¸‹ä¸€æ­¥æ“ä½œ
+		while(num--)//å†…å±‚å¾ªç¯ æ¬¡æ•°è·Ÿæ•°ç»„å†’æ³¡æ’åºä¸€æ ·
+		{   if(flag==1) //æŒ‰ç¼–å·
+            {
+			if(atoi(q->num)<atoi(p->num))
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+            }
+            if(flag==2) //æŒ‰å•ä»·
+            {
+			if(q->price<p->price)
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+            }
+            if(flag==3) //æŒ‰æ€»ä»·
+            {
+			if(q->total<p->total)
+			{
+				q->next = p->next;
+				p->next = q;
+				tail->next = p;
+			}
+            }
+			tail = tail->next;
+			q = tail->next;
+			p = q->next;
+		 } 
+	} 
+}
