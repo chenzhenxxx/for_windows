@@ -4,10 +4,10 @@ using namespace std;
 int begin_time;
 int end_time;
 int people;
-int total_time=0;
-int id = 1;
+int total_time = 0;
 queue<int> q;
-map<int,char *> m;//保存业务
+map<int, char *> m; // 保存业务
+map<int,int> Te;
 void second_to_hour(int second, int *hour, int *mintue, int *sec)
 {
 	*hour = second / 3600;
@@ -25,11 +25,12 @@ void Print_time(int second)
 	printf("[%02d:%02d:%02d]:", hour, mintue, sec);
 }
 void Print_work(int i)
-{   int num;
-	for(int j=1;j<=4;j++)
+{
+	int num;
+	for (int j = 1; j <= 4; j++)
 	{
-		num=s[i].getwork(j);
-		printf("%s 业务 : %d人\n",m[j],num);
+		num = s[i].getwork(j);
+		printf("%s 业务 : %d人\n", m[j], num);
 	}
 }
 bool cmp(Customer a, Customer b)
@@ -45,14 +46,94 @@ void Random_people()
 	}
 	sort(customer + 1, customer + people + 1, cmp);
 }
-void Continue_time(int sec1,int sec2)
+void Continue_time(int sec1, int sec2)
 {
-	int h1,h2,m1,m2,s1,s2;
-	second_to_hour(sec1,&h1,&m1,&s1);
-	second_to_hour(sec2,&h2,&m2,&s2);
-	printf("from[%02d:%02d:%02d] --- to  [%02d:%02d:%02d]", h1,m1,s1,h2,m2,s2);
-	total_time+=(sec2-sec1);
+	int h1, h2, m1, m2, s1, s2;
+	second_to_hour(sec1, &h1, &m1, &s1);
+	second_to_hour(sec2, &h2, &m2, &s2);
+	printf("from[%02d:%02d:%02d] --- to  [%02d:%02d:%02d]", h1, m1, s1, h2, m2, s2);
+	total_time += (sec2 - sec1);
 }
+
+int Enter_queue(int currentcustomer)
+{
+	int flag = 1;
+	int cnt=0;
+	queue<int> tmp;
+	if (q.empty())
+	{
+		q.push(currentcustomer);
+		return 0;
+	}
+	else
+	{
+		while (!q.empty())
+		{
+			if (customer[currentcustomer].getWorkId() < customer[q.front()].getWorkId() ||
+				((customer[currentcustomer].getWorkId() == customer[q.front()].getWorkId()) && (customer[currentcustomer].getTime() < customer[q.front()].getTime())))
+			{
+				flag = 0;
+				tmp.push(currentcustomer);
+				break;
+			}
+			else
+			{   cnt++;
+				tmp.push(q.front());
+				q.pop();
+			}
+		}
+		if (flag == 1)
+		{
+			tmp.push(currentcustomer);
+		}
+		else
+		{
+			while (!q.empty())
+			{
+				tmp.push(q.front());
+				q.pop();
+			}
+		}
+
+		q = tmp;
+		return cnt;
+	}
+}
+
+void Print_Fastesrttime(int sec,int p)
+{
+	int server_time = s[1].getRemainTime();
+	int queue_time = 0;
+	for (int i = 2; i <= 4; i++)
+	{
+		if (server_time > s[i].getRemainTime())
+		{
+			server_time = s[i].getRemainTime();
+		}
+	}
+
+	set<int> s;
+	queue<int> tmp = q;
+	while (!tmp.empty())
+	{
+		s.insert(tmp.front());
+		tmp.pop();
+	}
+	int cnt = 0;
+	for (auto it = s.begin(); cnt < p / 4; it++)
+	{
+		queue_time += Te[customer[*it].getWorkId()];
+		cnt++;
+	}
+	printf("最快还要:");
+	Print_time(queue_time + server_time);
+	printf("");
+	printf("时间即可办理业务\n");
+	printf("预计办理时间:");
+	Print_time(sec + queue_time + server_time);
+	printf("\n");
+}
+
 void Simulate()
 {
 	int currentcustomer = 1;
@@ -61,36 +142,38 @@ void Simulate()
 	//  {
 	// 	 printf("%d %d %d\n",customer[i].getId(),customer[i].getTime(),customer[i].getWorkId());
 	//  }
-	for (int i = begin_time; i <= end_time&&currentcustomer <= people+1; i++)
-	{    
+	for (int i = begin_time; i <= end_time && currentcustomer <= people + 1; i++)
+	{
 		for (int j = 1; j <= 4; j++)
 		{
 			if (s[j].getRemainTime() == 0) // 有窗口为空闲状态
 			{
 				Print_time(i);
-				printf("%02d 号客户在%d号创口办理完成[%s]业务", customer[s[j].getnum()].getId(), j,m[customer[s[j].getnum()].getWorkId()]);
-				Continue_time(customer[s[j].getnum()].getTime(),i);
+				printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务", customer[s[j].getnum()].getId(), j, m[customer[s[j].getnum()].getWorkId()]);
+				Continue_time(customer[s[j].getnum()].getTime(), i);
 				printf("\n\n");
 				s[j].cntadd(); // 完成人数加一
 
 				// pop出队
 				if (!q.empty())
-				{  Print_time(i);
-					printf("%02d 号客户在 %d 号口开始办理[%s]业务\n\n", q.front(), j,m[customer[q.front()].getWorkId()]);
+				{
+					Print_time(i);
+					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", q.front(), j, m[customer[q.front()].getWorkId()]);
 					s[j].charge_stuff(q.front());
 					q.pop();
 				}
-				else{
-					if(s[j].getRemainTime()!=-1)
-					s[j].charge_remaintime(-1);
+				else
+				{
+					if (s[j].getRemainTime() != -1)
+						s[j].charge_remaintime(-1);
 				}
 			}
 		}
 
-		while (i == customer[currentcustomer].getTime()) // 当前客户进来
+		while (i == customer[currentcustomer].getTime()) // 当前客户进来   //用while而不是if是因为有多个顾客同时进入的情况
 		{
-			id++;
-			customer[currentcustomer].charge_id(id);
+			
+			customer[currentcustomer].charge_id(currentcustomer);
 			int flag = 0;
 
 			for (int k = 1; k <= 4; k++)
@@ -100,14 +183,21 @@ void Simulate()
 					flag = 1;
 					s[k].charge_stuff(currentcustomer);
 					Print_time(i);
-					printf("%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k,m[customer[currentcustomer].getWorkId()]);
+					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k, m[customer[currentcustomer].getWorkId()]);
 					break;
 				}
 			}
 			if (flag == 0)
 			{ // 打印编号 队伍长度
-				q.push(currentcustomer);
-				// 入队列
+				int p=Enter_queue(currentcustomer);
+				Print_time(i);
+				printf("【打号】您已成功打号：%d号  业务为[%s]   \n", customer[currentcustomer].getId(), m[customer[currentcustomer].getWorkId()]);
+				printf("队伍前面还有:");
+				cout << p<< endl;
+				Print_Fastesrttime(i,p);
+				printf("******************************************\n");
+				// q.push(currentcustomer);
+				//  入队列
 			}
 			currentcustomer++;
 		}
@@ -117,36 +207,33 @@ void Simulate()
 				s[m].time();
 		}
 	}
-	int k=1;
+	int k = 1;
 	printf("\n");
 	printf("********************今日统计**********************\n");
-	printf("共接待：%d\n",s[1].getcnt()+s[2].getcnt()+s[3].getcnt()+s[4].getcnt());
-	printf("一号柜台共接待： %d人\n",s[1].getcnt());
+	printf("共接待：%d\n", s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt());
+	printf("一号柜台共接待： %d人\n", s[1].getcnt());
 	Print_work(1);
-	printf("二号柜台共接待： %d人\n",s[2].getcnt());
+	printf("二号柜台共接待： %d人\n", s[2].getcnt());
 	Print_work(2);
-	printf("三号柜台共接待： %d人\n",s[3].getcnt());
+	printf("三号柜台共接待： %d人\n", s[3].getcnt());
 	Print_work(3);
-	printf("四号柜台共接待： %d人\n",s[4].getcnt());
+	printf("四号柜台共接待： %d人\n", s[4].getcnt());
 	Print_work(4);
-	for(int i=2;i<=4;i++)
+	for (int i = 2; i <= 4; i++)
 	{
-		if(s[k].getcnt()<s[i].getcnt())
+		if (s[k].getcnt() < s[i].getcnt())
 		{
-			k=i;
+			k = i;
 		}
 	}
-	printf("今日勤劳之星为%d号\n",k);
+	printf("今日勤劳之星为%d号\n", k);
 
 	printf("顾客总逗留时间：");
 	Print_time(total_time);
 	printf("\n");
 	printf("顾客平均逗留时间: ");
-	Print_time(total_time/people);
+	Print_time(total_time / people);
 	printf("\n");
-
-
-	
 }
 
 void Bank()
@@ -222,9 +309,10 @@ void Welcome()
 }
 
 int main()
-{       m[1]="存款";
-        m[2]="取款";
-		m[3]="挂失";
-		m[4]="还贷";
-		Welcome();
+{
+	m[1] = "存款";Te[1]=600;
+	m[2] = "取款";Te[2]=1200;
+	m[3] = "挂失";Te[3]=1800;
+	m[4] = "还贷";Te[4]=3600;
+	Welcome();
 }

@@ -83,19 +83,19 @@ public:
     {
      case 1:
       this->works[1]++;
-      this->remainTime = rand() % 1200 + 300;
+      this->remainTime = rand() % 600 + 300;
       break;
     case 2:
       this->works[2]++;
-      this->remainTime = rand() %2400  + 300;
+      this->remainTime = rand() %1200  + 300;
       break;
     case 3:
       this->works[3]++;
-      this->remainTime = rand() % 1200 + 300;
+      this->remainTime = rand() %1800  + 300;
       break;
     case 4:
       this->works[4]++;
-      this->remainTime = rand() % 1560 + 300;
+      this->remainTime = rand() %3600  + 300;
       break;
     default:
       break;
