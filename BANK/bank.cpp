@@ -9,23 +9,23 @@ int total_time = 0;
 queue<int> q;
 map<int, char *> m; // 保存业务
 map<int, int> Te;
-void second_to_hour(int second, int *hour, int *mintue, int *sec)
+void second_to_hour(int second, int *hour, int *mintue, int *sec)   //秒转化成时分秒
 {
 	*hour = second / 3600;
 	*mintue = second % 3600 / 60;
 	*sec = second % 60;
 }
-int hour_to_second(int hour, int mintue, int second)
+int hour_to_second(int hour, int mintue, int second)//时分秒转化成秒
 {
 	return hour * 3600 + mintue * 60 + second;
 }
-void Print_time(int second)
+void Print_time(int second)   //打印时间
 {
 	int hour, mintue, sec;
 	second_to_hour(second, &hour, &mintue, &sec);
 	printf("[%02d:%02d:%02d]:", hour, mintue, sec);
 }
-void Print_work(int i)
+void Print_work(int i)  //打印某窗口所办业务人数
 {
 	int num;
 	for (int j = 1; j <= 4; j++)
@@ -34,20 +34,20 @@ void Print_work(int i)
 		printf("%s 业务 : %d人\n", m[j], num);
 	}
 }
-bool cmp(Customer a, Customer b)
+bool cmp(Customer a, Customer b)  
 {
 	return a.getTime() < b.getTime();
 }
-void Random_people()
+void Random_people()    //随机模拟
 {
 	for (int i = 1; i <= people; i++)
 	{
 		srand((unsigned)time(NULL) + customer[i - 1].getTime());
 		customer[i].charge_work_time(rand() % 4 + 1, (rand() % (end_time - begin_time) + begin_time));
 	}
-	sort(customer + 1, customer + people + 1, cmp);
+	sort(customer + 1, customer + people + 1, cmp);   //按进入时间排序
 }
-void Continue_time(int sec1, int sec2)
+void Continue_time(int sec1, int sec2)   //持续时间
 {
 	int h1, h2, m1, m2, s1, s2;
 	second_to_hour(sec1, &h1, &m1, &s1);
@@ -56,7 +56,7 @@ void Continue_time(int sec1, int sec2)
 	total_time += (sec2 - sec1);
 }
 
-int Enter_queue(int currentcustomer)
+int Enter_queue(int currentcustomer)   //排队
 {
 	int flag = 1;
 	int cnt = 0;
@@ -102,7 +102,7 @@ int Enter_queue(int currentcustomer)
 	}
 }
 
-void Print_Fastesrttime(int sec, int p)
+void Print_Fastesrttime(int sec, int p)    //最快还要多久
 {
 	int server_time = s[1].getRemainTime();
 	int queue_time = 0;
@@ -136,10 +136,10 @@ void Print_Fastesrttime(int sec, int p)
 	printf("\n");
 }
 
-int Total_Time()
+int Total_Time()  //总逗留时间
 {
 
-	while (!q.empty())
+	while (!q.empty()) //结束后还在排队的人
 	{
 		total_time += end_time - customer[q.front()].getTime();
 		q.pop();
@@ -147,7 +147,7 @@ int Total_Time()
 	return total_time;
 }
 
-int Dispose_of_residues()
+int Dispose_of_residues()  //处理结束后还正在窗口办理的人，加班
 {
 	int flag = 1;
 	int j = 1;
@@ -163,7 +163,7 @@ int Dispose_of_residues()
 				if (s[i].getRemainTime() == 0)
 				{
 					Print_time(j + end_time);
-					printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务\n", customer[s[i].getnum()].getId(), i, m[customer[s[i].getnum()].getWorkId()]);
+					printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务  ", customer[s[i].getnum()].getId(), i, m[customer[s[i].getnum()].getWorkId()]);
 					Continue_time(customer[s[i].getnum()].getTime(), end_time + j);
 					printf("\n");
 				}
@@ -177,7 +177,7 @@ int Dispose_of_residues()
 	return j;
 }
 
-void Simulate()
+void Simulate()  //模拟业务主函数
 {
 	int currentcustomer = 1;
 
@@ -198,7 +198,7 @@ void Simulate()
 				printf("\n\n");
 				// Sleep(500);
 				//  pop出队
-				if (!q.empty())
+				if (!q.empty())  //队不是空的，轮到队头办理业务
 				{
 					Print_time(i);
 					s[j].cntadd(); // 完成人数加一
@@ -207,9 +207,9 @@ void Simulate()
 					q.pop();
 					// Sleep(200);
 				}
-				else
+				else   //队空
 				{
-					if (s[j].getRemainTime() != -1)
+					if (s[j].getRemainTime() != -1) //将remaintime置为-1,接下来有人进入直接办理
 						s[j].charge_remaintime(-1);
 				}
 			}
@@ -218,30 +218,30 @@ void Simulate()
 		while (i == customer[currentcustomer].getTime()) // 当前客户进来   //用while而不是if是因为有多个顾客同时进入的情况
 		{
 
-			customer[currentcustomer].charge_id(currentcustomer);
+			customer[currentcustomer].charge_id(currentcustomer);  
 			int flag = 0;
 
 			for (int k = 1; k <= 4; k++)
 			{
-				if (s[k].getRemainTime() == -1) // 刚开始
+				if (s[k].getRemainTime() == -1) // 刚开始 队空且窗口无人
 				{
 					flag = 1;
-					s[k].charge_stuff(currentcustomer);
+					s[k].charge_stuff(currentcustomer);   //更新窗口客户信息
 					Print_time(i);
-					s[k].cntadd(); // 完成人数加一
+					s[k].cntadd(); // 服务人数加一
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k, m[customer[currentcustomer].getWorkId()]);
 					// Sleep(200);
 					break;
 				}
 			}
-			if (flag == 0)
+			if (flag == 0)  //没有空的窗口 ，进去排队
 			{ // 打印编号 队伍长度
 				int p = Enter_queue(currentcustomer);
 				Print_time(i);
 				printf("【打号】您已成功打号：%d号  业务为[%s]   \n", customer[currentcustomer].getId(), m[customer[currentcustomer].getWorkId()]);
 				printf("队伍前面还有:");
 				cout << p << endl;
-				Print_Fastesrttime(i, p);
+				Print_Fastesrttime(i, p); 
 				printf("******************************************\n");
 				// Sleep(500);
 				//  q.push(currentcustomer);
@@ -249,14 +249,14 @@ void Simulate()
 			}
 			currentcustomer++;
 		}
-		for (int m = 1; m <= 4; m++)
+		for (int m = 1; m <= 4; m++)  //每个窗口时间流逝
 		{
 			if (s[m].getRemainTime() > 0)
 				s[m].time();
 		}
 	}
-	int delay_time = Dispose_of_residues();
 
+	int delay_time = Dispose_of_residues(); //处理结束后，某些加班的窗口
 	int k = 1;
 	printf("\n");
 	cout << "正常下班时间: ";
@@ -306,7 +306,7 @@ void Simulate()
 	printf("\n");
 	printf("**********************************************");
 }
-void Clear()
+void Clear()  //模拟完成后，清理对象
 {
 	for (int i = 1; i <= 4; i++)
 	{
@@ -323,7 +323,7 @@ void Clear()
 	}
 }
 
-bool is_Digit(string s)
+bool is_Digit(string s)  //string是否为数字,用于判断是否非法输入
 {
 	for (auto it = s.begin(); it != s.end(); it++)
 	{
@@ -343,7 +343,7 @@ void Bank()
 	printf("请输入银行开始营业时间:(格式9:30)");
 	cin >> ss;
 	int pos = ss.find(":");
-	if (is_Digit(ss.substr(0, pos)) && is_Digit(ss.substr(pos + 1, ss.size())))
+	if (is_Digit(ss.substr(0, pos)) && is_Digit(ss.substr(pos + 1, ss.size())))  //判断是否非法
 	{
 		hour = atoi((ss.substr(0, pos)).c_str());
 		mintue = atoi((ss.substr(pos + 1, ss.size())).c_str());
@@ -359,7 +359,7 @@ void Bank()
 		return;
 	}
 
-	begin_time = hour_to_second(hour, mintue, 0);
+	begin_time = hour_to_second(hour, mintue, 0);  //开始时间
 
 	string se;
 	printf("请输入银行开始打烊时间:(格式18:30)");
@@ -396,7 +396,7 @@ void Bank()
 	}
 	people = atoi(sp.c_str());
 	srand((unsigned)time(NULL));
-	customer[0].charge_work_time(rand() % 4 + 1, rand() % (end_time - begin_time) + begin_time);
+	customer[0].charge_work_time(rand() % 4 + 1, rand() % (end_time - begin_time) + begin_time); //随机第0,为后面srand()更随机化
 	Random_people();
 	second_to_hour(begin_time, &h, &m, &s);
 	printf("[%02d:%02d:%02d]:", h, m, s);
@@ -424,7 +424,7 @@ void bankMenu()
 	select = atoi(st.c_str());
 	st.clear();
 	if (select == 1)
-	{
+	{   system("cls");
 		Bank();
 		Clear();
 	}
@@ -455,7 +455,7 @@ void bankMenu()
 		select = atoi(st.c_str());
 		st.clear();
 		if (select == 1)
-		{ // system("cls");
+		{  system("cls");
 			Bank();
 			Clear();
 		}

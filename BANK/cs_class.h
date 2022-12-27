@@ -78,7 +78,7 @@ public:
    void charge_stuff(int num)
   {
     this->people_id = num;
-    srand(customer[num].getTime() + customer[num].getWorkId());
+    srand(customer[num].getTime() + customer[num].getWorkId()+customer[num-1].getTime());
     switch (customer[num].getWorkId())
     {
      case 1:
