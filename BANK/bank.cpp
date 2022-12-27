@@ -138,7 +138,6 @@ void Print_Fastesrttime(int sec, int p)
 
 int Total_Time()
 {
-	
 
 	while (!q.empty())
 	{
@@ -162,10 +161,10 @@ int Dispose_of_residues()
 				flag = 0;
 				s[i].time();
 				if (s[i].getRemainTime() == 0)
-				{   
-					Print_time(j+end_time);
+				{
+					Print_time(j + end_time);
 					printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务\n", customer[s[i].getnum()].getId(), i, m[customer[s[i].getnum()].getWorkId()]);
-				    Continue_time(customer[s[i].getnum()].getTime(), end_time+j);
+					Continue_time(customer[s[i].getnum()].getTime(), end_time + j);
 					printf("\n");
 				}
 			}
@@ -256,20 +255,20 @@ void Simulate()
 				s[m].time();
 		}
 	}
-	int delay_time=Dispose_of_residues();
+	int delay_time = Dispose_of_residues();
 
 	int k = 1;
 	printf("\n");
-	cout<<"正常下班时间: ";
+	cout << "正常下班时间: ";
 	Print_time(end_time);
 	printf("\n");
-	cout<<"实际下班时间: ";
-	Print_time(end_time+delay_time);
+	cout << "实际下班时间: ";
+	Print_time(end_time + delay_time);
 	printf("\n");
 
 	printf("********************今日统计**********************\n");
-	printf("共来了%d 位顾客，共为：%d位客户处理完业务\n", people,s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt());
-	cout<<"服务效率为:"<<double(s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt())/double(people)*100<<"%"<<endl;
+	printf("共来了%d 位顾客，共为：%d位客户处理完业务\n", people, s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt());
+	cout << "服务效率为:" << double(s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt()) / double(people) * 100 << "%" << endl;
 	printf("**********************************************\n");
 	printf("一号柜台共接待： %d人\n", s[1].getcnt());
 	Print_work(1);
@@ -292,12 +291,12 @@ void Simulate()
 		if (s[k].getcnt() == s[i].getcnt())
 			printf("今日勤劳之星为%d号\n", i);
 	}
-    printf("*****************各项业务占比**************************\n");
-	cout<<m[1]<<"业务共:"<<s[1].getwork(1)+s[2].getwork(1)+s[3].getwork(1)+s[4].getwork(1)<<"人占比为:"<<double(s[1].getwork(1)+s[2].getwork(1)+s[3].getwork(1)+s[4].getwork(1))/double(people)*100<<"%"<<endl;
-    cout<<m[2]<<"业务共:"<<s[1].getwork(2)+s[2].getwork(2)+s[3].getwork(2)+s[4].getwork(2)<<"人占比为:"<<double(s[1].getwork(2)+s[2].getwork(2)+s[3].getwork(2)+s[4].getwork(2))/double(people)*100<<"%"<<endl;
-    cout<<m[3]<<"业务共:"<<s[1].getwork(3)+s[2].getwork(3)+s[3].getwork(3)+s[4].getwork(3)<<"人占比为:"<<double(s[1].getwork(3)+s[2].getwork(3)+s[3].getwork(3)+s[4].getwork(3))/double(people)*100<<"%"<<endl;
-    cout<<m[4]<<"业务共:"<<s[1].getwork(4)+s[2].getwork(4)+s[3].getwork(4)+s[4].getwork(4)<<"人占比为:"<<double(s[1].getwork(4)+s[2].getwork(4)+s[3].getwork(4)+s[4].getwork(4))/double(people)*100<<"%"<<endl;
-    printf("*****************客户逗留时间**************************\n");
+	printf("*****************各项业务占比**************************\n");
+	cout << m[1] << "业务共:" << s[1].getwork(1) + s[2].getwork(1) + s[3].getwork(1) + s[4].getwork(1) << "人占比为:" << double(s[1].getwork(1) + s[2].getwork(1) + s[3].getwork(1) + s[4].getwork(1)) / double(people) * 100 << "%" << endl;
+	cout << m[2] << "业务共:" << s[1].getwork(2) + s[2].getwork(2) + s[3].getwork(2) + s[4].getwork(2) << "人占比为:" << double(s[1].getwork(2) + s[2].getwork(2) + s[3].getwork(2) + s[4].getwork(2)) / double(people) * 100 << "%" << endl;
+	cout << m[3] << "业务共:" << s[1].getwork(3) + s[2].getwork(3) + s[3].getwork(3) + s[4].getwork(3) << "人占比为:" << double(s[1].getwork(3) + s[2].getwork(3) + s[3].getwork(3) + s[4].getwork(3)) / double(people) * 100 << "%" << endl;
+	cout << m[4] << "业务共:" << s[1].getwork(4) + s[2].getwork(4) + s[3].getwork(4) + s[4].getwork(4) << "人占比为:" << double(s[1].getwork(4) + s[2].getwork(4) + s[3].getwork(4) + s[4].getwork(4)) / double(people) * 100 << "%" << endl;
+	printf("*****************客户逗留时间**************************\n");
 	printf("顾客总逗留时间：");
 	total_time = Total_Time();
 	Print_time(total_time);
@@ -317,29 +316,69 @@ void Clear()
 	{
 		customer[j] = Customer();
 	}
-	begin_time = end_time = people = 0;
+	begin_time = end_time = total_time = people = 0;
 	while (!q.empty())
 	{
 		q.pop();
 	}
 }
+
+bool is_Digit(string s)
+{
+	for (auto it = s.begin(); it != s.end(); it++)
+	{
+		if (!isdigit(*it))
+		{
+			return false;
+		}
+	}
+	return true;
+}
+
 void Bank()
 {
 	int h, m, s;
 	int hour, mintue;
+	string ss;
 	printf("请输入银行开始营业时间:(格式9:30)");
-	scanf("%d:%d", &hour, &mintue);
-	if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
+	cin >> ss;
+	int pos = ss.find(":");
+	if (is_Digit(ss.substr(0, pos)) && is_Digit(ss.substr(pos + 1, ss.size())))
 	{
-		printf("输入非法!");
+		hour = atoi((ss.substr(0, pos)).c_str());
+		mintue = atoi((ss.substr(pos + 1, ss.size())).c_str());
+		if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
+		{
+			printf("输入非法!");
+			return;
+		}
+	}
+	else
+	{
+		cout << "输入格式错误" << endl;
 		return;
 	}
+
 	begin_time = hour_to_second(hour, mintue, 0);
+
+	string se;
 	printf("请输入银行开始打烊时间:(格式18:30)");
-	scanf("%d:%d", &hour, &mintue);
-	if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
+	cin >> se;
+	pos = se.find(":");
+	if (is_Digit(se.substr(0, pos)) && is_Digit(se.substr(pos + 1, se.size())))
 	{
-		cout << "输入非法!" << endl;
+		hour = atoi((se.substr(0, pos)).c_str());
+		mintue = atoi((se.substr(pos + 1, se.size())).c_str());
+		if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
+		{
+			cout << "输入非法!" << endl;
+			return;
+		}
+	}
+	else
+	{
+		cout << "输入格式错误" << endl;
+		return;
 	}
 	end_time = hour_to_second(hour, mintue, 0);
 	if (begin_time > end_time)
@@ -348,12 +387,14 @@ void Bank()
 		return;
 	}
 	printf("请输入模拟人数!\n");
-	cin >> people;
-	if (people < 0)
+	string sp;
+	cin >> sp;
+	if (!is_Digit(sp))
 	{
 		cout << "人数为负数非法!" << endl;
 		return;
 	}
+	people = atoi(sp.c_str());
 	srand((unsigned)time(NULL));
 	customer[0].charge_work_time(rand() % 4 + 1, rand() % (end_time - begin_time) + begin_time);
 	Random_people();
@@ -364,7 +405,8 @@ void Bank()
 }
 void bankMenu()
 {
-	int select = 0;
+	string st;
+	int select;
 	cout << "                    ===========================================================================" << endl;
 	cout << "                    |                                                                         |" << endl;
 	cout << "                    |                          ------ czx-Bank ------                         |" << endl;
@@ -373,7 +415,14 @@ void bankMenu()
 	cout << "                    |                         Enter 1 to begin to simulate                    |" << endl;
 	cout << "                    |                         Enter 2 to quit system                          |" << endl;
 	cout << "                    ===========================================================================" << endl;
-	cin >> select;
+	cin >> st;
+	if (!is_Digit(st))
+	{
+		cout << "输入非法,不是数字" << endl;
+		return;
+	}
+	select = atoi(st.c_str());
+	st.clear();
 	if (select == 1)
 	{
 		Bank();
@@ -397,7 +446,14 @@ void bankMenu()
 		cout << "                    |                         Enter 1 to again to simulate                    |" << endl;
 		cout << "                    |                         Enter 2 to quit system                          |" << endl;
 		cout << "                    ===========================================================================" << endl;
-		cin >> select;
+		cin >> st;
+		if (!is_Digit(st))
+		{
+			cout << "输入非法,不是数字" << endl;
+			return;
+		}
+		select = atoi(st.c_str());
+		st.clear();
 		if (select == 1)
 		{ // system("cls");
 			Bank();
