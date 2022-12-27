@@ -144,11 +144,11 @@ int Total_Time()
 		total_time+=end_time-customer[s[i].getnum()].getTime();
 		}
 	}
-    queue<int>tmp=q;
-	while(!tmp.empty())
+    
+	while(!q.empty())
 	{
-		total_time+=end_time-customer[tmp.front()].getTime();
-		tmp.pop();
+		total_time+=end_time-customer[q.front()].getTime();
+		q.pop();
 	}
 	return total_time;
 }
@@ -168,10 +168,11 @@ void Simulate()
 			if (s[j].getRemainTime() == 0) // 有窗口为空闲状态
 			{
 				Print_time(i);
+				
 				printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务", customer[s[j].getnum()].getId(), j, m[customer[s[j].getnum()].getWorkId()]);
 				Continue_time(customer[s[j].getnum()].getTime(), i);
 				printf("\n\n");
-				Sleep(500);
+				//Sleep(500);
 				// pop出队
 				if (!q.empty())
 				{
@@ -180,7 +181,7 @@ void Simulate()
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", q.front(), j, m[customer[q.front()].getWorkId()]);
 					s[j].charge_stuff(q.front());
 					q.pop();
-					Sleep(200);
+					//Sleep(200);
 				}
 				else
 				{
@@ -205,7 +206,7 @@ void Simulate()
 					Print_time(i);
 					s[k].cntadd(); // 完成人数加一
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k, m[customer[currentcustomer].getWorkId()]);
-					Sleep(200);
+					//Sleep(200);
 					break;
 				}
 			}
@@ -218,7 +219,7 @@ void Simulate()
 				cout << p << endl;
 				Print_Fastesrttime(i, p);
 				printf("******************************************\n");
-				Sleep(500);
+				//Sleep(500);
 				// q.push(currentcustomer);
 				//  入队列
 			}
@@ -249,7 +250,11 @@ void Simulate()
 			k = i;
 		}
 	}
-	printf("今日勤劳之星为%d号\n", k);
+	for(int i=1;i<=4;i++)
+	{
+		if(s[k].getcnt()==s[i].getcnt())
+			printf("今日勤劳之星为%d号\n", i);
+	}
 
 	printf("顾客总逗留时间：");
 	total_time=Total_Time();
@@ -259,7 +264,22 @@ void Simulate()
 	Print_time(total_time / people);
 	printf("\n");
 }
-
+void Clear()
+{
+	 for(int i=1;i<=4;i++)
+	 {
+		s[i]=Staff();
+	 }
+	 for(int j=0;j<=people;j++)
+	 {
+		customer[j]=Customer();
+	 }
+	 begin_time=end_time=people=0;
+	 while(!q.empty())
+	 {
+		q.pop();
+	 }
+}
 void Bank()
 {
 	int h, m, s;
@@ -312,6 +332,7 @@ void bankMenu()
 	if (select == 1)
 	{
 		Bank();
+		Clear();
 	}
 	else if (select == 2)
 	{
@@ -321,6 +342,8 @@ void bankMenu()
 	{
 		cout << "输入非法" << endl;
 	}
+	while(1)
+	{
 	cout << "                    ===========================================================================" << endl;
 	cout << "                    |                                                                         |" << endl;
 	cout << "                    |                          ------ czx-Bank ------                         |" << endl;
@@ -331,8 +354,9 @@ void bankMenu()
 	cout << "                    ===========================================================================" << endl;
 	cin >> select;
 	if (select == 1)
-	{   system("cls");
+	{   //system("cls");
 		Bank();
+		Clear();
 	}
 	else if (select == 2)
 	{
@@ -341,6 +365,7 @@ void bankMenu()
 	else
 	{
 		cout << "输入非法" << endl;
+	}
 	}
 }
 void Welcome()
