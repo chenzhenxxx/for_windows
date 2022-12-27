@@ -42,7 +42,7 @@ void Random_people()
 {
 	for (int i = 1; i <= people; i++)
 	{
-		srand(customer[i - 1].getTime() + time(0));
+		srand((unsigned)time(NULL) + customer[i - 1].getTime());
 		customer[i].charge_work_time(rand() % 4 + 1, (rand() % (end_time - begin_time) + begin_time));
 	}
 	sort(customer + 1, customer + people + 1, cmp);
@@ -138,19 +138,44 @@ void Print_Fastesrttime(int sec, int p)
 
 int Total_Time()
 {
-	for(int i=1;i<=4;i++)
-	{   if(s[i].getRemainTime()>0)
-	    {
-		total_time+=end_time-customer[s[i].getnum()].getTime();
-		}
-	}
-    
-	while(!q.empty())
+	
+
+	while (!q.empty())
 	{
-		total_time+=end_time-customer[q.front()].getTime();
+		total_time += end_time - customer[q.front()].getTime();
 		q.pop();
 	}
 	return total_time;
+}
+
+int Dispose_of_residues()
+{
+	int flag = 1;
+	int j = 1;
+	for (j = 1;; j++)
+	{
+		flag = 1;
+		for (int i = 1; i <= 4; i++)
+		{
+			if (s[i].getRemainTime() > 0)
+			{
+				flag = 0;
+				s[i].time();
+				if (s[i].getRemainTime() == 0)
+				{   
+					Print_time(j+end_time);
+					printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务\n", customer[s[i].getnum()].getId(), i, m[customer[s[i].getnum()].getWorkId()]);
+				    Continue_time(customer[s[i].getnum()].getTime(), end_time+j);
+					printf("\n");
+				}
+			}
+		}
+		if (flag == 1)
+		{
+			break;
+		}
+	}
+	return j;
 }
 
 void Simulate()
@@ -168,12 +193,12 @@ void Simulate()
 			if (s[j].getRemainTime() == 0) // 有窗口为空闲状态
 			{
 				Print_time(i);
-				
+
 				printf("【办理完成】%02d 号客户在%d号创口办理完成[%s]业务", customer[s[j].getnum()].getId(), j, m[customer[s[j].getnum()].getWorkId()]);
 				Continue_time(customer[s[j].getnum()].getTime(), i);
 				printf("\n\n");
-				//Sleep(500);
-				// pop出队
+				// Sleep(500);
+				//  pop出队
 				if (!q.empty())
 				{
 					Print_time(i);
@@ -181,7 +206,7 @@ void Simulate()
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", q.front(), j, m[customer[q.front()].getWorkId()]);
 					s[j].charge_stuff(q.front());
 					q.pop();
-					//Sleep(200);
+					// Sleep(200);
 				}
 				else
 				{
@@ -206,7 +231,7 @@ void Simulate()
 					Print_time(i);
 					s[k].cntadd(); // 完成人数加一
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k, m[customer[currentcustomer].getWorkId()]);
-					//Sleep(200);
+					// Sleep(200);
 					break;
 				}
 			}
@@ -219,9 +244,9 @@ void Simulate()
 				cout << p << endl;
 				Print_Fastesrttime(i, p);
 				printf("******************************************\n");
-				//Sleep(500);
-				// q.push(currentcustomer);
-				//  入队列
+				// Sleep(500);
+				//  q.push(currentcustomer);
+				//   入队列
 			}
 			currentcustomer++;
 		}
@@ -231,10 +256,21 @@ void Simulate()
 				s[m].time();
 		}
 	}
+	int delay_time=Dispose_of_residues();
+
 	int k = 1;
 	printf("\n");
+	cout<<"正常下班时间: ";
+	Print_time(end_time);
+	printf("\n");
+	cout<<"实际下班时间: ";
+	Print_time(end_time+delay_time);
+	printf("\n");
+
 	printf("********************今日统计**********************\n");
-	printf("共接待：%d\n", s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt());
+	printf("共来了%d 位顾客，共为：%d位客户处理完业务\n", people,s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt());
+	cout<<"服务效率为:"<<double(s[1].getcnt() + s[2].getcnt() + s[3].getcnt() + s[4].getcnt())/double(people)*100<<"%"<<endl;
+	printf("**********************************************\n");
 	printf("一号柜台共接待： %d人\n", s[1].getcnt());
 	Print_work(1);
 	printf("二号柜台共接待： %d人\n", s[2].getcnt());
@@ -243,6 +279,7 @@ void Simulate()
 	Print_work(3);
 	printf("四号柜台共接待： %d人\n", s[4].getcnt());
 	Print_work(4);
+	printf("******************今日劳模****************************\n");
 	for (int i = 2; i <= 4; i++)
 	{
 		if (s[k].getcnt() < s[i].getcnt())
@@ -250,67 +287,75 @@ void Simulate()
 			k = i;
 		}
 	}
-	for(int i=1;i<=4;i++)
+	for (int i = 1; i <= 4; i++)
 	{
-		if(s[k].getcnt()==s[i].getcnt())
+		if (s[k].getcnt() == s[i].getcnt())
 			printf("今日勤劳之星为%d号\n", i);
 	}
-
+    printf("*****************各项业务占比**************************\n");
+	cout<<m[1]<<"业务共:"<<s[1].getwork(1)+s[2].getwork(1)+s[3].getwork(1)+s[4].getwork(1)<<"人占比为:"<<double(s[1].getwork(1)+s[2].getwork(1)+s[3].getwork(1)+s[4].getwork(1))/double(people)*100<<"%"<<endl;
+    cout<<m[2]<<"业务共:"<<s[1].getwork(2)+s[2].getwork(2)+s[3].getwork(2)+s[4].getwork(2)<<"人占比为:"<<double(s[1].getwork(2)+s[2].getwork(2)+s[3].getwork(2)+s[4].getwork(2))/double(people)*100<<"%"<<endl;
+    cout<<m[3]<<"业务共:"<<s[1].getwork(3)+s[2].getwork(3)+s[3].getwork(3)+s[4].getwork(3)<<"人占比为:"<<double(s[1].getwork(3)+s[2].getwork(3)+s[3].getwork(3)+s[4].getwork(3))/double(people)*100<<"%"<<endl;
+    cout<<m[4]<<"业务共:"<<s[1].getwork(4)+s[2].getwork(4)+s[3].getwork(4)+s[4].getwork(4)<<"人占比为:"<<double(s[1].getwork(4)+s[2].getwork(4)+s[3].getwork(4)+s[4].getwork(4))/double(people)*100<<"%"<<endl;
+    printf("*****************客户逗留时间**************************\n");
 	printf("顾客总逗留时间：");
-	total_time=Total_Time();
+	total_time = Total_Time();
 	Print_time(total_time);
 	printf("\n");
 	printf("顾客平均逗留时间: ");
 	Print_time(total_time / people);
 	printf("\n");
+	printf("**********************************************");
 }
 void Clear()
 {
-	 for(int i=1;i<=4;i++)
-	 {
-		s[i]=Staff();
-	 }
-	 for(int j=0;j<=people;j++)
-	 {
-		customer[j]=Customer();
-	 }
-	 begin_time=end_time=people=0;
-	 while(!q.empty())
-	 {
+	for (int i = 1; i <= 4; i++)
+	{
+		s[i] = Staff();
+	}
+	for (int j = 0; j <= people; j++)
+	{
+		customer[j] = Customer();
+	}
+	begin_time = end_time = people = 0;
+	while (!q.empty())
+	{
 		q.pop();
-	 }
+	}
 }
 void Bank()
 {
 	int h, m, s;
-	int hour,time;
+	int hour, mintue;
 	printf("请输入银行开始营业时间:(格式9:30)");
-	scanf("%d:%d", &hour, &time);
-	if (hour < 0 || hour > 23 || time < 0 || time > 59)
+	scanf("%d:%d", &hour, &mintue);
+	if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
 	{
 		printf("输入非法!");
 		return;
 	}
-	begin_time = hour_to_second(hour, time, 0);
+	begin_time = hour_to_second(hour, mintue, 0);
 	printf("请输入银行开始打烊时间:(格式18:30)");
-	scanf("%d:%d", &hour, &time);
-	if (hour < 0 || hour > 23 || time < 0 || time > 59)
+	scanf("%d:%d", &hour, &mintue);
+	if (hour < 0 || hour > 23 || mintue < 0 || mintue > 59)
 	{
-		cout<<"输入非法!"<<endl;
+		cout << "输入非法!" << endl;
 	}
-	end_time = hour_to_second(hour, time, 0);
+	end_time = hour_to_second(hour, mintue, 0);
 	if (begin_time > end_time)
 	{
-		cout<<"开店时间比关门时间迟!"<<endl;
+		cout << "开店时间比关门时间迟!" << endl;
 		return;
 	}
 	printf("请输入模拟人数!\n");
 	cin >> people;
-	if(people<0)
+	if (people < 0)
 	{
-		cout<<"人数为负数非法!"<<endl;
-		return ;
+		cout << "人数为负数非法!" << endl;
+		return;
 	}
+	srand((unsigned)time(NULL));
+	customer[0].charge_work_time(rand() % 4 + 1, rand() % (end_time - begin_time) + begin_time);
 	Random_people();
 	second_to_hour(begin_time, &h, &m, &s);
 	printf("[%02d:%02d:%02d]:", h, m, s);
@@ -342,30 +387,30 @@ void bankMenu()
 	{
 		cout << "输入非法" << endl;
 	}
-	while(1)
+	while (1)
 	{
-	cout << "                    ===========================================================================" << endl;
-	cout << "                    |                                                                         |" << endl;
-	cout << "                    |                          ------ czx-Bank ------                         |" << endl;
-	cout << "                    |                                                                         |" << endl;
-	cout << "                    |                                                                         |" << endl;
-	cout << "                    |                         Enter 1 to again to simulate                    |" << endl;
-	cout << "                    |                         Enter 2 to quit system                          |" << endl;
-	cout << "                    ===========================================================================" << endl;
-	cin >> select;
-	if (select == 1)
-	{   //system("cls");
-		Bank();
-		Clear();
-	}
-	else if (select == 2)
-	{
-		return;
-	}
-	else
-	{
-		cout << "输入非法" << endl;
-	}
+		cout << "                    ===========================================================================" << endl;
+		cout << "                    |                                                                         |" << endl;
+		cout << "                    |                          ------ czx-Bank ------                         |" << endl;
+		cout << "                    |                                                                         |" << endl;
+		cout << "                    |                                                                         |" << endl;
+		cout << "                    |                         Enter 1 to again to simulate                    |" << endl;
+		cout << "                    |                         Enter 2 to quit system                          |" << endl;
+		cout << "                    ===========================================================================" << endl;
+		cin >> select;
+		if (select == 1)
+		{ // system("cls");
+			Bank();
+			Clear();
+		}
+		else if (select == 2)
+		{
+			return;
+		}
+		else
+		{
+			cout << "输入非法" << endl;
+		}
 	}
 }
 void Welcome()

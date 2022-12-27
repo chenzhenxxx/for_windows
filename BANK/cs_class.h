@@ -13,9 +13,6 @@ private:
 public:
   Customer()
   {
-     this->id=0;
-     this->entertime=0;
-     this->workid=0;
   }
   void charge_id(int id)
   {
@@ -49,13 +46,7 @@ private:
   int works[5];
   // queue<Customer> q;//员工面前的队伍
 public:
-  Staff(){
-    this->remainTime=-1;
-    this->people_id=0;
-    this->count=0;
-    memset(this->works,0,sizeof(works));
-    
-  }
+ 
   int getRemainTime()
   {
     return this->remainTime;
@@ -80,7 +71,7 @@ public:
   {
     this->remainTime--;
   }
-  int charge_remaintime(int time)
+  void charge_remaintime(int time)
   {
     this->remainTime=-1;
   }
