@@ -9,6 +9,7 @@ int total_time = 0;
 queue<int> q;
 map<int, char *> m; // 保存业务
 map<int, int> Te;
+int tj[5]; //统计各项业务
 void second_to_hour(int second, int *hour, int *mintue, int *sec)   //秒转化成时分秒
 {
 	*hour = second / 3600;
@@ -71,7 +72,8 @@ int Enter_queue(int currentcustomer)   //排队
 		while (!q.empty())
 		{
 			if (customer[currentcustomer].getWorkId() < customer[q.front()].getWorkId() ||
-				((customer[currentcustomer].getWorkId() == customer[q.front()].getWorkId()) && (customer[currentcustomer].getTime() < customer[q.front()].getTime())))
+				((customer[currentcustomer].getWorkId() == customer[q.front()].getWorkId()) && 
+				(customer[currentcustomer].getTime() < customer[q.front()].getTime())))
 			{
 				flag = 0;
 				tmp.push(currentcustomer);
@@ -102,7 +104,7 @@ int Enter_queue(int currentcustomer)   //排队
 	}
 }
 
-void Print_Fastesrttime(int sec, int p)    //最快还要多久
+void Print_Fastesttime(int sec, int p)    //最快还要多久
 {
 	int server_time = s[1].getRemainTime();
 	int queue_time = 0;
@@ -229,6 +231,9 @@ void Simulate()  //模拟业务主函数
 					s[k].charge_stuff(currentcustomer);   //更新窗口客户信息
 					Print_time(i);
 					s[k].cntadd(); // 服务人数加一
+					tj[customer[currentcustomer].getWorkId()]++;
+					printf("【打号】您已成功打号：%d号  业务为[%s]   \n", customer[currentcustomer].getId(), m[customer[currentcustomer].getWorkId()]);
+					printf("当前%d窗口空闲,请前往\n",k);
 					printf("【办理中】%02d 号客户在 %d 号口开始办理[%s]业务\n\n", customer[currentcustomer].getId(), k, m[customer[currentcustomer].getWorkId()]);
 					// Sleep(200);
 					break;
@@ -238,10 +243,11 @@ void Simulate()  //模拟业务主函数
 			{ // 打印编号 队伍长度
 				int p = Enter_queue(currentcustomer);
 				Print_time(i);
+				tj[customer[currentcustomer].getWorkId()]++;
 				printf("【打号】您已成功打号：%d号  业务为[%s]   \n", customer[currentcustomer].getId(), m[customer[currentcustomer].getWorkId()]);
 				printf("队伍前面还有:");
 				cout << p << endl;
-				Print_Fastesrttime(i, p); 
+				Print_Fastesttime(i, p); 
 				printf("******************************************\n");
 				// Sleep(500);
 				//  q.push(currentcustomer);
@@ -292,10 +298,10 @@ void Simulate()  //模拟业务主函数
 			printf("今日勤劳之星为%d号\n", i);
 	}
 	printf("*****************各项业务占比**************************\n");
-	cout << m[1] << "业务共:" << s[1].getwork(1) + s[2].getwork(1) + s[3].getwork(1) + s[4].getwork(1) << "人占比为:" << double(s[1].getwork(1) + s[2].getwork(1) + s[3].getwork(1) + s[4].getwork(1)) / double(people) * 100 << "%" << endl;
-	cout << m[2] << "业务共:" << s[1].getwork(2) + s[2].getwork(2) + s[3].getwork(2) + s[4].getwork(2) << "人占比为:" << double(s[1].getwork(2) + s[2].getwork(2) + s[3].getwork(2) + s[4].getwork(2)) / double(people) * 100 << "%" << endl;
-	cout << m[3] << "业务共:" << s[1].getwork(3) + s[2].getwork(3) + s[3].getwork(3) + s[4].getwork(3) << "人占比为:" << double(s[1].getwork(3) + s[2].getwork(3) + s[3].getwork(3) + s[4].getwork(3)) / double(people) * 100 << "%" << endl;
-	cout << m[4] << "业务共:" << s[1].getwork(4) + s[2].getwork(4) + s[3].getwork(4) + s[4].getwork(4) << "人占比为:" << double(s[1].getwork(4) + s[2].getwork(4) + s[3].getwork(4) + s[4].getwork(4)) / double(people) * 100 << "%" << endl;
+	cout << m[1] << "业务共:" <<tj[1] << "人占比为:" << double(tj[1]) / double(people) * 100 << "%" << endl;
+	cout << m[2] << "业务共:" << tj[2] << "人占比为:" << double(tj[2]) / double(people) * 100 << "%" << endl;
+	cout << m[3] << "业务共:" << tj[3] << "人占比为:" << double(tj[3]) / double(people) * 100 << "%" << endl;
+	cout << m[4] << "业务共:" << tj[4] << "人占比为:" << double(tj[4]) / double(people) * 100 << "%" << endl;
 	printf("*****************客户逗留时间**************************\n");
 	printf("顾客总逗留时间：");
 	total_time = Total_Time();
@@ -321,6 +327,7 @@ void Clear()  //模拟完成后，清理对象
 	{
 		q.pop();
 	}
+	memset(tj,0,sizeof(tj));
 }
 
 bool is_Digit(string s)  //string是否为数字,用于判断是否非法输入
